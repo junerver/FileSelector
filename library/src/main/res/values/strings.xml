@@ -1,0 +1,9 @@
+<resources>
+    <string name="selected_file_count">完成(%1$s/%2$s)</string>
+    <string-array name="sort_list">
+        <item>按名称</item>
+        <item>按时间</item>
+        <item>按大小</item>
+        <item>按类型</item>
+    </string-array>
+</resources>
