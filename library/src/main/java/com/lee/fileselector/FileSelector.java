@@ -157,7 +157,7 @@ public class FileSelector {
             try {
                 Thread.sleep(100);
                 while (!GlobalThreadPools.getInstance().hasDone()) {
-                    Thread.sleep(50);
+                    Thread.sleep(20);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -172,6 +172,7 @@ public class FileSelector {
         private void getFolderFiles(String path) {
             if (!isForEachStop) {
                 File file = new File(path);
+                String absPath = file.getAbsolutePath();
                 File[] files = file.listFiles(mFileFilter);
                 if (files == null || files.length == 0) {
                     return;
@@ -195,8 +196,8 @@ public class FileSelector {
                 }
                 //加入集合
                 mFileModelSet.addAll(fms);
-                if (!mFilesIndexMap.keySet().contains(path)) {
-                    mFilesIndexMap.put(path, fms);
+                if (!mFilesIndexMap.keySet().contains(absPath)) {
+                    mFilesIndexMap.put(absPath, fms);
                     //此处加入回调函数，从回调中获取每次的增量，通知UI更新
                     if (mCallBack != null) {
                         mCallBack.onNext(fms);
