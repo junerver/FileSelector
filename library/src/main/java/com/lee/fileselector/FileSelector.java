@@ -36,14 +36,11 @@ public class FileSelector {
     private HashMap<String, List<FileModel>> mFilesIndexMap = new HashMap<>();
 
     public OnResultListener<FileModel> listener;
-    public boolean isForEachStop;
-    private Worker mWorker = new Worker();
+    public boolean isForEachStop  = false;
 
     public FileSelector(Activity activity) {
         mActivity = activity;
         selectPaths = new String[]{"/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/" + mActivity.getPackageName() + "/"};
-        mFileModelSet.clear();
-        mFilesIndexMap.clear();
     }
 
     public static FileSelector getInstance(Activity activity) {
@@ -122,7 +119,7 @@ public class FileSelector {
     }
 
     public Worker getWorker() {
-        return mWorker;
+        return new Worker();
     }
 
     interface FilesScanCallBack {
@@ -139,6 +136,8 @@ public class FileSelector {
             mCallBack = callBack;
             return this;
         }
+
+        private FileFilter mFileFilter = null;
 
         private List<FileModel> getFiles() {
             if (mFileFilter == null) {
@@ -158,7 +157,7 @@ public class FileSelector {
             try {
                 Thread.sleep(100);
                 while (!GlobalThreadPools.getInstance().hasDone()) {
-                    Thread.sleep(40);
+                    Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -169,8 +168,6 @@ public class FileSelector {
             }
             return list;
         }
-
-        private FileFilter mFileFilter = null;
 
         private void getFolderFiles(String path) {
             if (!isForEachStop) {
@@ -238,9 +235,14 @@ public class FileSelector {
         }
 
         public void work() {
-            getFiles();
+            mFileModelSet.clear();
+            mFilesIndexMap.clear();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    getFiles();
+                }
+            }).start();
         }
     }
-
-
 }

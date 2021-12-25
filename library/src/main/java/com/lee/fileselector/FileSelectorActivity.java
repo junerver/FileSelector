@@ -35,7 +35,7 @@ public class FileSelectorActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView empty;
 
-    private List<FileModel> mFileModels = new ArrayList<>();
+    private List<FileModel> mFileModels = Collections.synchronizedList(new ArrayList<FileModel>());
     private final ArrayList<FileModel> mSelectedFileList = new ArrayList<>();
     private MenuItem mCountMenuItem;
     private int mSelectSortTypeIndex;
@@ -67,12 +67,7 @@ public class FileSelectorActivity extends AppCompatActivity {
             public void passPermission() {
                 progressBar.setVisibility(View.VISIBLE);
                 initAdapter();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getFiles();
-                    }
-                }).start();
+                getFiles();
             }
 
             @Override
@@ -88,7 +83,7 @@ public class FileSelectorActivity extends AppCompatActivity {
 
     }
 
-    private synchronized void getFiles() {
+    private void getFiles() {
         mFileModels.clear();
         if (mCountMenuItem != null) {
             runOnUiThread(new Runnable() {
@@ -105,39 +100,39 @@ public class FileSelectorActivity extends AppCompatActivity {
                     @Override
                     public void onNext(List<FileModel> fileModels) {
                         Log.d(TAG, "扫描到：" + fileModels.size() + "个文件");
-                        mFileModels.addAll(fileModels);
-                        sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mFileAdapter != null) {
-                                    mFileAdapter.notifyDataSetChanged();
-                                    if (mFileModels.isEmpty()) {
-                                        empty.setVisibility(View.VISIBLE);
-                                        recyclerView.setVisibility(View.GONE);
-                                    } else {
-                                        progressBar.setVisibility(View.GONE);
-                                        empty.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.VISIBLE);
+                        if (mFileModels != null) {
+                            mFileModels.addAll(fileModels);
+                            sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mFileAdapter != null) {
+                                        mFileAdapter.notifyDataSetChanged();
+                                        if (mFileModels != null && mFileModels.isEmpty()) {
+                                            empty.setVisibility(View.VISIBLE);
+                                            recyclerView.setVisibility(View.GONE);
+                                        } else {
+                                            progressBar.setVisibility(View.GONE);
+                                            empty.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
 
                     @Override
                     public void onCompleted(List<FileModel> fileModels) {
-                        Log.d(TAG, "扫描完成，总数：" + fileModels.size() + "个文件");
-                        mFileModels.clear();
-                        mFileModels.addAll(fileModels);
+                        Log.d(TAG, "扫描完成，总数：" + fileModels.size() + "个文件\n" +
+                                "校验："+mFileModels.size());
                         sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 if (mFileAdapter != null) {
                                     mFileAdapter.notifyDataSetChanged();
-                                    if (mFileModels.isEmpty()) {
+                                    if (mFileModels != null && mFileModels.isEmpty()) {
                                         empty.setVisibility(View.VISIBLE);
                                         recyclerView.setVisibility(View.GONE);
                                     } else {
@@ -156,7 +151,6 @@ public class FileSelectorActivity extends AppCompatActivity {
 
     private void sortFileList(int mSortType) {
         mSelectedFileList.clear();
-        long start = System.currentTimeMillis();
         try {
             if (mSortType == FileUtils.BY_NAME_ASC) {
                 Collections.sort(mFileModels, new FileUtils.SortByName());
@@ -340,6 +334,8 @@ public class FileSelectorActivity extends AppCompatActivity {
         if (FileSelector.getInstance(this).listener != null) {
             FileSelector.getInstance(this).listener.onCancel();
         }
+        mFileModels = null;
+        Log.d(TAG, "onBackPressed: 尝试关闭页面");
         finish();
     }
 
