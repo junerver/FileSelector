@@ -9,21 +9,13 @@ package com.lee.fileselector;
  * Version: v1.0
  */
 
-import android.os.Build;
-import android.util.Log;
-
-import androidx.annotation.RequiresApi;
-
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * 全局使用的线程池
@@ -57,7 +49,7 @@ public class GlobalThreadPools {
     private void initThreadPool() {
         THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
                 CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-                sPoolWorkQueue, sThreadFactory, new RejectedHandler()) ;
+                sPoolWorkQueue, sThreadFactory, new RejectedHandler());
     }
 
     private static class RejectedHandler implements RejectedExecutionHandler {
@@ -90,6 +82,7 @@ public class GlobalThreadPools {
 
     /**
      * 排队总数+活动总数数量为则可以认定全部任务执行完毕
+     *
      * @return
      */
     public boolean hasDone() {
@@ -101,15 +94,15 @@ public class GlobalThreadPools {
         }
     }
 
-
     /**
      * 通过interrupt方法尝试停止正在执行的任务，但是不保证真的终止正在执行的任务
      * 停止队列中处于等待的任务的执行
      * 不再接收新的任务 慎用！
+     *
      * @return 等待执行的任务列表
      */
-    public void shutdownNow(){
-         THREAD_POOL_EXECUTOR.shutdownNow();
+    public void shutdownNow() {
+        THREAD_POOL_EXECUTOR.shutdownNow();
         THREAD_POOL_EXECUTOR = null;
     }
 
@@ -119,7 +112,7 @@ public class GlobalThreadPools {
      * 已经执行的任务会继续执行
      * 如果任务已经执行完了没有必要再调用这个方法
      */
-    public void shutDown(){
+    public void shutDown() {
         THREAD_POOL_EXECUTOR.shutdown();
         sPoolWorkQueue.clear();
     }
