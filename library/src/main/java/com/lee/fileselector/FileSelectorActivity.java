@@ -99,33 +99,8 @@ public class FileSelectorActivity extends AppCompatActivity {
                 .setCallBack(new FileSelector.FilesScanCallBack() {
                     @Override
                     public void onNext(List<FileModel> fileModels) {
-                        Log.d(TAG, "扫描到：" + fileModels.size() + "个文件");
-                        if (mFileModels != null) {
-                            mFileModels.addAll(fileModels);
-                            sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (mFileAdapter != null) {
-                                        mFileAdapter.notifyDataSetChanged();
-                                        if (mFileModels != null && mFileModels.isEmpty()) {
-                                            empty.setVisibility(View.VISIBLE);
-                                            recyclerView.setVisibility(View.GONE);
-                                        } else {
-                                            progressBar.setVisibility(View.GONE);
-                                            empty.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.VISIBLE);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onCompleted(List<FileModel> fileModels) {
-                        Log.d(TAG, "扫描完成，总数：" + fileModels.size() + "个文件\n" +
-                                "校验："+mFileModels.size());
+                        Log.d(TAG, "扫描到：" + fileModels.size() + "个文件"+Thread.currentThread().getName());
+                        mFileModels.addAll(fileModels);
                         sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
                         runOnUiThread(new Runnable() {
                             @Override
@@ -133,6 +108,29 @@ public class FileSelectorActivity extends AppCompatActivity {
                                 if (mFileAdapter != null) {
                                     mFileAdapter.notifyDataSetChanged();
                                     if (mFileModels != null && mFileModels.isEmpty()) {
+                                        empty.setVisibility(View.VISIBLE);
+                                        recyclerView.setVisibility(View.GONE);
+                                    } else {
+                                        progressBar.setVisibility(View.GONE);
+                                        empty.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCompleted(List<FileModel> fileModels) {
+                        Log.d(TAG, "扫描完成，总数：" + fileModels.size() + "个文件\n" +
+                                "校验：" + mFileModels.size());
+                        sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFileAdapter != null) {
+                                    mFileAdapter.notifyDataSetChanged();
+                                    if (mFileModels.isEmpty()) {
                                         empty.setVisibility(View.VISIBLE);
                                         recyclerView.setVisibility(View.GONE);
                                     } else {
@@ -334,8 +332,8 @@ public class FileSelectorActivity extends AppCompatActivity {
         if (FileSelector.getInstance(this).listener != null) {
             FileSelector.getInstance(this).listener.onCancel();
         }
-        mFileModels = null;
         Log.d(TAG, "onBackPressed: 尝试关闭页面");
+        GlobalThreadPools.getInstance().shutdownNow();
         finish();
     }
 

@@ -9,7 +9,10 @@ package com.lee.fileselector;
  * Version: v1.0
  */
 
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -20,6 +23,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * 全局使用的线程池
@@ -53,19 +57,7 @@ public class GlobalThreadPools {
     private void initThreadPool() {
         THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
                 CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-                sPoolWorkQueue, sThreadFactory, new RejectedHandler()) {
-            @Override
-            public void execute(Runnable command) {
-                super.execute(command);
-                //执行完毕后排队+活动应该等于零
-                Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-                Log.d(TAG, "活动总数ActiveCount=" + getActiveCount());
-                Log.d(TAG, "排队总数Queue=" + getQueue().size());
-                Log.d(TAG, "完成总数CompletedTaskCount=" + getCompletedTaskCount());
-                Log.d(TAG, "线程池大小PoolSize=" + getPoolSize());
-                Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-            }
-        };
+                sPoolWorkQueue, sThreadFactory, new RejectedHandler()) ;
     }
 
     private static class RejectedHandler implements RejectedExecutionHandler {
@@ -90,6 +82,9 @@ public class GlobalThreadPools {
     }
 
     public void execute(Runnable command) {
+        if (THREAD_POOL_EXECUTOR == null) {
+            initThreadPool();
+        }
         THREAD_POOL_EXECUTOR.execute(command);
     }
 
@@ -98,22 +93,29 @@ public class GlobalThreadPools {
      * @return
      */
     public boolean hasDone() {
-        return THREAD_POOL_EXECUTOR.getQueue().size() + THREAD_POOL_EXECUTOR.getActiveCount() == 0;
+        if (THREAD_POOL_EXECUTOR != null) {
+            return THREAD_POOL_EXECUTOR.getQueue().size() + THREAD_POOL_EXECUTOR.getActiveCount() == 0;
+        } else {
+            //线程池已经置空任务结束
+            return true;
+        }
     }
+
 
     /**
      * 通过interrupt方法尝试停止正在执行的任务，但是不保证真的终止正在执行的任务
      * 停止队列中处于等待的任务的执行
-     * 不再接收新的任务
+     * 不再接收新的任务 慎用！
      * @return 等待执行的任务列表
      */
-    public List<Runnable> shutdownNow(){
-        return THREAD_POOL_EXECUTOR.shutdownNow();
+    public void shutdownNow(){
+         THREAD_POOL_EXECUTOR.shutdownNow();
+        THREAD_POOL_EXECUTOR = null;
     }
 
     /**
      * 停止队列中处于等待的任务
-     * 不再接收新的任务
+     * 不再接收新的任务 慎用！
      * 已经执行的任务会继续执行
      * 如果任务已经执行完了没有必要再调用这个方法
      */
