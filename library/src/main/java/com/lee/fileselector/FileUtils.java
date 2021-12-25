@@ -83,67 +83,9 @@ public class FileUtils {
         }
     }
 
-    public static class SortByExtension implements Comparator<File> {
+    public static class SortByExtension implements Comparator<FileModel> {
 
         public SortByExtension() {
-            super();
-        }
-
-        @Override
-        public int compare(File f1, File f2) {
-            if (f1 == null || f2 == null) {
-                if (f1 == null) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            } else {
-                if (f1.isDirectory() && f2.isFile()) {
-                    return -1;
-                } else if (f1.isFile() && f2.isDirectory()) {
-                    return 1;
-                } else {
-                    String ext_1 = getExtension(f1.getAbsolutePath());
-                    String ext_2 = getExtension(f2.getAbsolutePath());
-                    if (ext_1.equalsIgnoreCase(ext_2)) {
-                        return new SortByName().compare(f1, f2);
-                    } else {
-                        return ext_1.compareToIgnoreCase(ext_2);
-                    }
-                }
-            }
-        }
-    }
-
-    public static class SortByName implements Comparator<File> {
-
-        public SortByName() {
-            super();
-        }
-
-        @Override
-        public int compare(File f1, File f2) {
-            if (f1 == null || f2 == null) {
-                if (f1 == null) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            } else {
-                if (f1.isDirectory() && f2.isFile()) {
-                    return -1;
-                } else if (f1.isFile() && f2.isDirectory()) {
-                    return 1;
-                } else {
-                    return f1.getName().compareToIgnoreCase(f2.getName());
-                }
-            }
-        }
-    }
-
-    public static class SortByName2 implements Comparator<FileModel> {
-
-        public SortByName2() {
             super();
         }
 
@@ -156,19 +98,46 @@ public class FileUtils {
                     return 1;
                 }
             } else {
-                    return f1.getName().compareToIgnoreCase(f2.getName());
+                String ext_1 = f1.getExtension();
+                String ext_2 = f2.getExtension();
+                if (ext_1.equalsIgnoreCase(ext_2)) {
+                    return new SortByName().compare(f1, f2);
+                } else {
+                    return ext_1.compareToIgnoreCase(ext_2);
+                }
             }
         }
     }
 
-    public static class SortBySize implements Comparator<File> {
+
+    public static class SortByName implements Comparator<FileModel> {
+
+        public SortByName() {
+            super();
+        }
+
+        @Override
+        public int compare(FileModel f1, FileModel f2) {
+            if (f1 == null || f2 == null) {
+                if (f1 == null) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            } else {
+                return f1.getName().compareToIgnoreCase(f2.getName());
+            }
+        }
+    }
+
+    public static class SortBySize implements Comparator<FileModel> {
 
         public SortBySize() {
             super();
         }
 
         @Override
-        public int compare(File f1, File f2) {
+        public int compare(FileModel f1, FileModel f2) {
             if (f1 == null || f2 == null) {
                 if (f1 == null) {
                     return -1;
@@ -176,29 +145,23 @@ public class FileUtils {
                     return 1;
                 }
             } else {
-                if (f1.isDirectory() && f2.isFile()) {
+                if (f1.getSize() < f2.getSize()) {
                     return -1;
-                } else if (f1.isFile() && f2.isDirectory()) {
-                    return 1;
                 } else {
-                    if (f1.length() < f2.length()) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
+                    return 1;
                 }
             }
         }
     }
 
-    public static class SortByTime implements Comparator<File> {
+    public static class SortByTime implements Comparator<FileModel> {
 
         public SortByTime() {
             super();
         }
 
         @Override
-        public int compare(File f1, File f2) {
+        public int compare(FileModel f1, FileModel f2) {
             if (f1 == null || f2 == null) {
                 if (f1 == null) {
                     return -1;
@@ -206,16 +169,10 @@ public class FileUtils {
                     return 1;
                 }
             } else {
-                if (f1.isDirectory() && f2.isFile()) {
-                    return -1;
-                } else if (f1.isFile() && f2.isDirectory()) {
+                if (f1.getDate() > f2.getDate()) {
                     return 1;
                 } else {
-                    if (f1.lastModified() > f2.lastModified()) {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
+                    return -1;
                 }
             }
         }

@@ -8,11 +8,11 @@
         android:title="完成(0)"
         app:showAsAction="always" />
 
-<!--    <item-->
-<!--        android:id="@+id/browser_sort"-->
-<!--        android:icon="@drawable/ic_sort"-->
-<!--        android:orderInCategory="100"-->
-<!--        android:title="排序"-->
-<!--        app:showAsAction="always" />-->
+    <item
+        android:id="@+id/browser_sort"
+        android:icon="@drawable/ic_sort"
+        android:orderInCategory="100"
+        android:title="排序"
+        app:showAsAction="always" />
 
 </menu>
