@@ -29,17 +29,17 @@ import java.util.List;
  * @author Lee
  */
 public class FileSelectorActivity extends AppCompatActivity {
-    private static final String TAG="FileSelector";
+    private static final String TAG = "FileSelector";
 
     private FastScrollRecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView empty;
 
-    private  List<FileModel> fileModels = new ArrayList<>();
+    private List<FileModel> mFileModels = new ArrayList<>();
     private final ArrayList<FileModel> mSelectedFileList = new ArrayList<>();
     private MenuItem mCountMenuItem;
     private int mSelectSortTypeIndex;
-    private FileAdapter fileAdapter;
+    private FileAdapter mFileAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +66,7 @@ public class FileSelectorActivity extends AppCompatActivity {
             @Override
             public void passPermission() {
                 progressBar.setVisibility(View.VISIBLE);
+                initAdapter();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -84,10 +85,11 @@ public class FileSelectorActivity extends AppCompatActivity {
                 Toast.makeText(FileSelectorActivity.this, "读写权限被拒绝", Toast.LENGTH_LONG).show();
             }
         });
+
     }
 
     private synchronized void getFiles() {
-        fileModels.clear();
+        mFileModels.clear();
         if (mCountMenuItem != null) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -98,27 +100,58 @@ public class FileSelectorActivity extends AppCompatActivity {
         }
         FileSelector.getInstance(this).setThreadStop(false);
         long start = System.currentTimeMillis();
-        fileModels =  FileSelector.getInstance(this).getFiles();
+        FileSelector.getInstance(this).getWorker()
+                .setCallBack(new FileSelector.FilesScanCallBack() {
+                    @Override
+                    public void onNext(List<FileModel> fileModels) {
+                        Log.d(TAG, "扫描到：" + fileModels.size() + "个文件");
+                        mFileModels.addAll(fileModels);
+                        sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFileAdapter != null) {
+                                    mFileAdapter.notifyDataSetChanged();
+                                    if (mFileModels.isEmpty()) {
+                                        empty.setVisibility(View.VISIBLE);
+                                        recyclerView.setVisibility(View.GONE);
+                                    } else {
+                                        progressBar.setVisibility(View.GONE);
+                                        empty.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+                        });
+                    }
 
-        sortFileList(FileSelector.getInstance(this).mSortType);
-        if (fileModels.size() <= 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    empty.setVisibility(View.VISIBLE);
-                    initAdapter();
-                }
-            });
-        } else {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    initAdapter();
-                }
-            });
-        }
-        long end = System.currentTimeMillis();
-        Log.d(TAG, "全流程耗时: "+(end-start) + "文件总量："+fileModels.size());
+                    @Override
+                    public void onCompleted(List<FileModel> fileModels) {
+                        Log.d(TAG, "扫描完成，总数：" + fileModels.size() + "个文件");
+                        mFileModels.clear();
+                        mFileModels.addAll(fileModels);
+                        sortFileList(FileSelector.getInstance(FileSelectorActivity.this).mSortType);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFileAdapter != null) {
+                                    mFileAdapter.notifyDataSetChanged();
+                                    if (mFileModels.isEmpty()) {
+                                        empty.setVisibility(View.VISIBLE);
+                                        recyclerView.setVisibility(View.GONE);
+                                    } else {
+                                        progressBar.setVisibility(View.GONE);
+                                        empty.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+                        });
+                        long end = System.currentTimeMillis();
+                        Log.d(TAG, "全流程耗时: " + (end - start) + "文件总量：" + mFileModels.size());
+                    }
+                }).work();
     }
 
     private void sortFileList(int mSortType) {
@@ -126,25 +159,25 @@ public class FileSelectorActivity extends AppCompatActivity {
         long start = System.currentTimeMillis();
         try {
             if (mSortType == FileUtils.BY_NAME_ASC) {
-                Collections.sort(fileModels, new FileUtils.SortByName());
+                Collections.sort(mFileModels, new FileUtils.SortByName());
             } else if (mSortType == FileUtils.BY_NAME_DESC) {
-                Collections.sort(fileModels, new FileUtils.SortByName());
-                Collections.reverse(fileModels);
+                Collections.sort(mFileModels, new FileUtils.SortByName());
+                Collections.reverse(mFileModels);
             } else if (mSortType == FileUtils.BY_TIME_ASC) {
-                Collections.sort(fileModels, new FileUtils.SortByTime());
+                Collections.sort(mFileModels, new FileUtils.SortByTime());
             } else if (mSortType == FileUtils.BY_TIME_DESC) {
-                Collections.sort(fileModels, new FileUtils.SortByTime());
-                Collections.reverse(fileModels);
+                Collections.sort(mFileModels, new FileUtils.SortByTime());
+                Collections.reverse(mFileModels);
             } else if (mSortType == FileUtils.BY_SIZE_ASC) {
-                Collections.sort(fileModels, new FileUtils.SortBySize());
+                Collections.sort(mFileModels, new FileUtils.SortBySize());
             } else if (mSortType == FileUtils.BY_SIZE_DESC) {
-                Collections.sort(fileModels, new FileUtils.SortBySize());
-                Collections.reverse(fileModels);
+                Collections.sort(mFileModels, new FileUtils.SortBySize());
+                Collections.reverse(mFileModels);
             } else if (mSortType == FileUtils.BY_EXTENSION_ASC) {
-                Collections.sort(fileModels, new FileUtils.SortByExtension());
+                Collections.sort(mFileModels, new FileUtils.SortByExtension());
             } else if (mSortType == FileUtils.BY_EXTENSION_DESC) {
-                Collections.sort(fileModels, new FileUtils.SortByExtension());
-                Collections.reverse(fileModels);
+                Collections.sort(mFileModels, new FileUtils.SortByExtension());
+                Collections.reverse(mFileModels);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,12 +185,12 @@ public class FileSelectorActivity extends AppCompatActivity {
     }
 
     private void initAdapter() {
-        fileAdapter = new FileAdapter(this, R.layout.item_file_selector, fileModels);
-        fileAdapter.setSelectedFileList(mSelectedFileList);
+        mFileAdapter = new FileAdapter(this, R.layout.item_file_selector, mFileModels);
+        mFileAdapter.setSelectedFileList(mSelectedFileList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(fileAdapter);
+        recyclerView.setAdapter(mFileAdapter);
         if (mCountMenuItem != null) {
-            fileAdapter.setCountMenuItem(mCountMenuItem);
+            mFileAdapter.setCountMenuItem(mCountMenuItem);
         }
         progressBar.setVisibility(View.GONE);
     }
@@ -166,8 +199,8 @@ public class FileSelectorActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.selector_menu, menu);
         mCountMenuItem = menu.findItem(R.id.select_count);
-        if (fileAdapter != null) {
-            fileAdapter.setCountMenuItem(mCountMenuItem);
+        if (mFileAdapter != null) {
+            mFileAdapter.setCountMenuItem(mCountMenuItem);
         }
         mCountMenuItem.setTitle(String.format(getString(R.string.selected_file_count), String.valueOf(mSelectedFileList.size()), String.valueOf(FileSelector.getInstance(FileSelectorActivity.this).maxCount)));
         return true;
@@ -175,7 +208,7 @@ public class FileSelectorActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (fileAdapter == null) {
+        if (mFileAdapter == null) {
             ToastUtils.showShort("请等待文件加载完毕");
             return true;
         }
@@ -238,8 +271,8 @@ public class FileSelectorActivity extends AppCompatActivity {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            if (fileAdapter != null) {
-                                                fileAdapter.notifyDataSetChanged();
+                                            if (mFileAdapter != null) {
+                                                mFileAdapter.notifyDataSetChanged();
                                                 progressBar.setVisibility(View.GONE);
                                                 recyclerView.setVisibility(View.VISIBLE);
                                             }
@@ -281,9 +314,9 @@ public class FileSelectorActivity extends AppCompatActivity {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            if (fileAdapter != null) {
-                                                fileAdapter.setData(fileModels);
-                                                fileAdapter.notifyDataSetChanged();
+                                            if (mFileAdapter != null) {
+                                                mFileAdapter.setData(mFileModels);
+                                                mFileAdapter.notifyDataSetChanged();
                                                 progressBar.setVisibility(View.GONE);
                                                 recyclerView.setVisibility(View.VISIBLE);
                                             }
@@ -313,7 +346,7 @@ public class FileSelectorActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        FileSelector.getInstance(this).mFileModels.clear();
+        FileSelector.getInstance(this).mFileModelSet.clear();
     }
 
     @Override

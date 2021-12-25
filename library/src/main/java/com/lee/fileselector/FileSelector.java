@@ -11,8 +11,9 @@ import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Lee
@@ -30,14 +31,19 @@ public class FileSelector {
     public String[] selectPaths;
     public String[] ignorePaths;
     public Activity mActivity;
-    public List<FileModel> mFileModels = Collections.synchronizedList(new ArrayList<FileModel>());
+    public CopyOnWriteArraySet<FileModel> mFileModelSet = new CopyOnWriteArraySet<>();
+    //对应路径下的文件 index 为路径
+    private HashMap<String, List<FileModel>> mFilesIndexMap = new HashMap<>();
+
     public OnResultListener<FileModel> listener;
     public boolean isForEachStop;
+    private Worker mWorker = new Worker();
 
     public FileSelector(Activity activity) {
         mActivity = activity;
         selectPaths = new String[]{"/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/" + mActivity.getPackageName() + "/"};
-        mFileModels.clear();
+        mFileModelSet.clear();
+        mFilesIndexMap.clear();
     }
 
     public static FileSelector getInstance(Activity activity) {
@@ -115,88 +121,126 @@ public class FileSelector {
         mActivity.startActivityForResult(intent, requestCode);
     }
 
-    public List<FileModel> getFiles() {
-        if (mFileFilter == null) {
-            mFileFilter = new MyFileFilter(mFileTypes, isShow);
-        }
-        if (selectPaths != null && selectPaths.length > 0) {
-            for (String selectPath : selectPaths) {
-                //线程池开启任务
-                GlobalThreadPools.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        getFolderFiles(selectPath);
-                    }
-                });
-            }
-        }
-        try {
-            Thread.sleep(100);
-            while (!GlobalThreadPools.getInstance().hasDone()) {
-                Thread.sleep(40);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-        return mFileModels;
+    public Worker getWorker() {
+        return mWorker;
     }
 
-    private FileFilter mFileFilter = null;
+    interface FilesScanCallBack {
+        void onNext(List<FileModel> fileModels);
 
-    public void getFolderFiles(String path) {
-        if (!isForEachStop) {
-            File file = new File(path);
-            File[] files = file.listFiles(mFileFilter);
-            if (files == null || files.length == 0) {
-                return;
+        void onCompleted(List<FileModel> fileModels);
+    }
+
+    class Worker {
+
+        private FilesScanCallBack mCallBack;
+
+        public Worker setCallBack(FilesScanCallBack callBack) {
+            mCallBack = callBack;
+            return this;
+        }
+
+        private List<FileModel> getFiles() {
+            if (mFileFilter == null) {
+                mFileFilter = new MyFileFilter(mFileTypes, isShow);
             }
-            List<File> dirs = new ArrayList();
-            List<FileModel> fms = new ArrayList();
-            for (File value : files) {
-                if (value.isFile()) {
-                    FileModel fileModel = new FileModel();
-                    String pathStr = value.getAbsolutePath();
-                    fileModel.setExtension(FileUtils.getExtension(pathStr));
-                    fileModel.setName(FileUtils.getName(pathStr));
-                    fileModel.setPath(pathStr);
-                    fileModel.setSize(value.length());
-                    fileModel.setDate(value.lastModified());
-                    fms.add(fileModel);
-                } else {
-                    //加入目录
-                    dirs.add(value);
-                }
-            }
-            mFileModels.addAll(fms);
-            for (File dir : dirs) {
-                if (ignorePaths != null && ignorePaths.length > 0) {
-                    for (String ignorePath : ignorePaths) {
-                        if (!(dir.getAbsolutePath().toLowerCase().contains(ignorePath.toLowerCase()))) {
-                            //线程池开启任务
-                            GlobalThreadPools.getInstance().execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    getFolderFiles(dir.getAbsolutePath());
-                                }
-                            });
-                        }
-                    }
-                } else {
+            if (selectPaths != null && selectPaths.length > 0) {
+                for (String selectPath : selectPaths) {
                     //线程池开启任务
                     GlobalThreadPools.getInstance().execute(new Runnable() {
                         @Override
                         public void run() {
-                            getFolderFiles(dir.getAbsolutePath());
+                            getFolderFiles(selectPath);
                         }
                     });
                 }
             }
+            try {
+                Thread.sleep(100);
+                while (!GlobalThreadPools.getInstance().hasDone()) {
+                    Thread.sleep(40);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            List list = new ArrayList<>(mFileModelSet);
+            if (mCallBack != null) {
+                mCallBack.onCompleted(list);
+            }
+            return list;
+        }
+
+        private FileFilter mFileFilter = null;
+
+        private void getFolderFiles(String path) {
+            if (!isForEachStop) {
+                File file = new File(path);
+                File[] files = file.listFiles(mFileFilter);
+                if (files == null || files.length == 0) {
+                    return;
+                }
+                List<File> dirs = new ArrayList();
+                List<FileModel> fms = new ArrayList();
+                for (File value : files) {
+                    if (value.isFile()) {
+                        FileModel fileModel = new FileModel();
+                        String pathStr = value.getAbsolutePath();
+                        fileModel.setExtension(FileUtils.getExtension(pathStr));
+                        fileModel.setName(FileUtils.getName(pathStr));
+                        fileModel.setPath(pathStr);
+                        fileModel.setSize(value.length());
+                        fileModel.setDate(value.lastModified());
+                        fms.add(fileModel);
+                    } else {
+                        //加入目录
+                        dirs.add(value);
+                    }
+                }
+                //加入集合
+                mFileModelSet.addAll(fms);
+                if (!mFilesIndexMap.keySet().contains(path)) {
+                    mFilesIndexMap.put(path, fms);
+                    //此处加入回调函数，从回调中获取每次的增量，通知UI更新
+                    if (mCallBack != null) {
+                        mCallBack.onNext(fms);
+                    }
+                }
+                //遍历其余目录
+                for (File dir : dirs) {
+                    String dirPath = dir.getAbsolutePath();
+                    if (!mFilesIndexMap.keySet().contains(dirPath)) {
+                        //该路径下的文件未被遍历
+                        if (ignorePaths != null && ignorePaths.length > 0) {
+                            for (String ignorePath : ignorePaths) {
+                                if (!(dirPath.toLowerCase().contains(ignorePath.toLowerCase()))) {
+                                    //线程池开启任务
+                                    GlobalThreadPools.getInstance().execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getFolderFiles(dirPath);
+                                        }
+                                    });
+                                }
+                            }
+                        } else {
+                            //线程池开启任务
+                            GlobalThreadPools.getInstance().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    getFolderFiles(dirPath);
+                                }
+                            });
+                        }
+                    }
+
+                }
+            }
+        }
+
+        public void work() {
+            getFiles();
         }
     }
-
-
 
 
 }

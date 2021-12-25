@@ -3,6 +3,8 @@ package com.lee.fileselector;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * @author Lee
  */
@@ -101,4 +103,17 @@ public class FileModel implements Parcelable {
             return new FileModel[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FileModel)) return false;
+        FileModel fileModel = (FileModel) o;
+        return path.equals(fileModel.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
 }
