@@ -107,15 +107,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResult(List<FileModel> result) {
                         for (FileModel fileModel : result) {
-                            Log.d("bbb", fileModel.getPath());
-                            Log.d("bbb", "~~~~~~~~~~~~~~~~");
+                            Log.d("bbb~~~~~~~~~~~~~~~~", fileModel.getPath());
+                            Log.d("bbb~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~");
                         }
                     }
 
 
                     @Override
                     public void onCancel() {
-                        Log.d("bbb", "onCancel");
+                        Log.d("bbb~~~~~~~~~~~~~~~~", "onCancel");
                     }
                 }).start();
     }

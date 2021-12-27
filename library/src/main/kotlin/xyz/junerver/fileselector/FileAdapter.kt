@@ -66,35 +66,37 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
             R.id.tv_detail,
             getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size)
         )
-        checkBox.setOnCheckedChangeListener(null)
-        checkBox.setChecked(fileModel.isSelected, false)
-        checkBox.setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { checkBox, isChecked ->
-            if (!isChecked && fileModel.isSelected) {
-                val index = findFileIndex(fileModel)
-                if (index != -1) {
-                    mSelectedFileList!!.removeAt(index)
+        checkBox.apply {
+            setOnCheckedChangeListener(null)
+            setChecked(fileModel.isSelected, false)
+            setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { checkBox, isChecked ->
+                if (!isChecked && fileModel.isSelected) {
+                    val index = findFileIndex(fileModel)
+                    if (index != -1) {
+                        mSelectedFileList!!.removeAt(index)
+                    }
+                    fileModel.isSelected = false
+                } else if (isChecked && !fileModel.isSelected) {
+                    if (mSelectedFileList!!.size >= FileSelector.maxCount) {
+                        Toast.makeText(
+                            mContext,
+                            "您最多只能选择" + FileSelector.maxCount.toString() + "个",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        checkBox.setChecked(false, true)
+                        return@OnCheckedChangeListener
+                    }
+                    Log.d(TAG, "onCheckedChanged: " + fileModel.name)
+                    mSelectedFileList!!.add(fileModel)
+                    fileModel.isSelected = true
                 }
-                fileModel.isSelected = false
-            } else if (isChecked && !fileModel.isSelected) {
-                if (mSelectedFileList!!.size >= FileSelector.maxCount) {
-                    Toast.makeText(
-                        mContext,
-                        "您最多只能选择" + FileSelector.maxCount.toString() + "个",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    checkBox.setChecked(false, true)
-                    return@OnCheckedChangeListener
-                }
-                Log.d(TAG, "onCheckedChanged: " + fileModel.name)
-                mSelectedFileList!!.add(fileModel)
-                fileModel.isSelected = true
-            }
-            mCountMenuItem!!.title = String.format(
-                mContext.getString(R.string.selected_file_count),
-                mSelectedFileList!!.size.toString(),
-                java.lang.String.valueOf(FileSelector.maxCount)
-            )
-        })
+                mCountMenuItem!!.title = String.format(
+                    mContext.getString(R.string.selected_file_count),
+                    mSelectedFileList!!.size.toString(),
+                    java.lang.String.valueOf(FileSelector.maxCount)
+                )
+            })
+        }
         layout.setOnClickListener { v: View? ->
             if (fileModel.isSelected) {
                 val index = findFileIndex(fileModel)
@@ -115,7 +117,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 fileModel.isSelected = true
             }
             checkBox.setChecked(fileModel.isSelected, true)
-            mCountMenuItem!!.title = String.format(
+            mCountMenuItem?.title = String.format(
                 mContext.getString(R.string.selected_file_count),
                 mSelectedFileList!!.size.toString(),
                 java.lang.String.valueOf(FileSelector.maxCount)
