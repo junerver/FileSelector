@@ -134,14 +134,19 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
 
     private fun formatFileSize(size: Long): String {
         val df = DecimalFormat("#.00")
-        val fileSizeString: String = if (size < 1024) {
-            df.format(size.toDouble()) + "B"
-        } else if (size < 1048576) {
-            df.format(size.toDouble() / 1024) + "K"
-        } else if (size < 1073741824) {
-            df.format(size.toDouble() / 1048576) + "M"
-        } else {
-            df.format(size.toDouble() / 1073741824) + "G"
+        val fileSizeString: String = when {
+            size < 1024 -> {
+                df.format(size.toDouble()) + "B"
+            }
+            size < 1048576 -> {
+                df.format(size.toDouble() / 1024) + "K"
+            }
+            size < 1073741824 -> {
+                df.format(size.toDouble() / 1048576) + "M"
+            }
+            else -> {
+                df.format(size.toDouble() / 1073741824) + "G"
+            }
         }
         return fileSizeString
     }
