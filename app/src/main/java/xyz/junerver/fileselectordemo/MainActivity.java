@@ -1,4 +1,4 @@
-package com.lee.fileselectordemo;
+package xyz.junerver.fileselectordemo;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,10 +7,10 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.lee.fileselector.FileModel;
-import com.lee.fileselector.FileSelector;
-import com.lee.fileselector.FileUtils;
-import com.lee.fileselector.OnResultListener;
+import xyz.junerver.fileselector.FileModel;
+import xyz.junerver.fileselector.FileUtils;
+import xyz.junerver.fileselector.FileSelector;
+import xyz.junerver.fileselector.OnResultListener;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.lee.fileselector;
+package xyz.junerver.fileselector;
 
 import java.io.File;
 import java.util.ArrayList;

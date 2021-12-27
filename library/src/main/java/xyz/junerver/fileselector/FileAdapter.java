@@ -1,7 +1,8 @@
-package com.lee.fileselector;
+package xyz.junerver.fileselector;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -22,6 +23,8 @@ import java.util.List;
  * @author Lee
  */
 public class FileAdapter extends CommonAdapter<FileModel> implements FastScrollRecyclerView.SectionedAdapter {
+
+    private static final String TAG = "FileAdapter";
 
     private MenuItem mCountMenuItem;
 
@@ -93,6 +96,7 @@ public class FileAdapter extends CommonAdapter<FileModel> implements FastScrollR
                         checkBox.setChecked(false, true);
                         return;
                     }
+                    Log.d(TAG, "onCheckedChanged: "+ fileModel.getName());
                     mSelectedFileList.add(fileModel);
                     fileModel.setSelected(true);
                 }

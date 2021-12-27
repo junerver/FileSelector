@@ -1,4 +1,4 @@
-package com.lee.fileselector;
+package xyz.junerver.fileselector;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Checkable;
+
 
 /**
  * https://github.com/andyxialm/SmoothCheckBox

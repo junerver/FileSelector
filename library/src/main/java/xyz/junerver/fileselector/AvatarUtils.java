@@ -1,4 +1,4 @@
-package com.lee.fileselector;
+package xyz.junerver.fileselector;
 
 import android.content.Context;
 import android.graphics.Bitmap;

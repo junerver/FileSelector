@@ -1,4 +1,4 @@
-package com.lee.fileselector;
+package xyz.junerver.fileselector;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;

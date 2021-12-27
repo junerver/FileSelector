@@ -1,4 +1,4 @@
-package com.lee.fileselector;
+package xyz.junerver.fileselector;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -36,7 +36,7 @@ public class FileSelector {
     private HashMap<String, List<FileModel>> mFilesIndexMap = new HashMap<>();
 
     public OnResultListener<FileModel> listener;
-    public boolean isForEachStop  = false;
+    public boolean isForEachStop = false;
 
     public FileSelector(Activity activity) {
         mActivity = activity;
@@ -181,13 +181,14 @@ public class FileSelector {
                 List<FileModel> fms = new ArrayList();
                 for (File value : files) {
                     if (value.isFile()) {
-                        FileModel fileModel = new FileModel();
                         String pathStr = value.getAbsolutePath();
-                        fileModel.setExtension(FileUtils.getExtension(pathStr));
-                        fileModel.setName(FileUtils.getName(pathStr));
-                        fileModel.setPath(pathStr);
-                        fileModel.setSize(value.length());
-                        fileModel.setDate(value.lastModified());
+                        FileModel fileModel = new FileModel(
+                                pathStr,
+                                FileUtils.getName(pathStr),
+                                FileUtils.getExtension(pathStr),
+                                value.length(),
+                                value.lastModified()
+                        );
                         fms.add(fileModel);
                     } else {
                         //加入目录

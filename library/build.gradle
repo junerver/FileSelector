@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
 
 android {
     compileSdkVersion project.ext.compileSdkVersion
@@ -15,6 +17,11 @@ android {
         checkReleaseBuilds false
         abortOnError false
     }
+    sourceSets {
+        getByName("main") {
+            java.srcDir("src/main/kotlin")
+        }
+    }
 }
 
 dependencies {
@@ -22,6 +29,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    //kotlin 标准库
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     implementation 'com.google.android.material:material:1.3.0'
 
@@ -29,7 +38,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.0'
 
     implementation 'com.github.shichuanenhui:baseadapter:2.0.0'
-    implementation 'com.github.shichuanenhui:utils:2.0.0'
 
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.1'
 }
