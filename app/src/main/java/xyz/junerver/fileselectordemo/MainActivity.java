@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 .setSelectPath("/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/")
 //                .isShowHiddenFile(true)
                 .setBarColorRes(R.color.colorAccent)
-                .setIgnorePath("Android", "Tencent")
+//                .setIgnorePath("Android", "Tencent")
                 .setFileType(
                         "jpg", "gif", "png", "bmp", "jpeg", "webp", "wmv", "flv", "mp4", "avi", "mpg", "mpeg", "rmvb", "rm", "asf",
                         "f4v", "vob", "mkv", "3gp", "mov", "mid", "wav", "wma", "mp3", "ogg", "amr", "m4a", "3gpp", "aac", "swf",
