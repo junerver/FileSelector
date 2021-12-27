@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -14,9 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-import xyz.junerver.fileselector.FileSelector.FilesScanCallBack
-import xyz.junerver.fileselector.FileUtils.*
+import xyz.junerver.fileselector.FileUtils.RESULT_KEY
 import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
+import xyz.junerver.fileselector.logicwork.FilesScanWorker
+import xyz.junerver.fileselector.logicwork.StartActivityUI
 import java.util.*
 
 
@@ -26,9 +26,14 @@ class FileSelectorActivity : AppCompatActivity() {
     private lateinit var empty: TextView
     private val mFileModels = Collections.synchronizedList(ArrayList<FileModel>())
     private val mSelectedFileList = ArrayList<FileModel>()
-    private var mCountMenuItem: MenuItem?=null
+    private var mCountMenuItem: MenuItem? = null
+    //用户选择的排序方式索引
     private var mSelectSortTypeIndex = 0
     private lateinit var mFileAdapter: FileAdapter
+    //用户当前选择的排序方式
+    private var mCurrentSortType = FileSelector.mSortType
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_selector)
@@ -36,8 +41,8 @@ class FileSelectorActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         val mToolBar = findViewById<Toolbar>(R.id.toolbar)
         empty = findViewById(R.id.empty)
-        window.statusBarColor = FileSelector.getInstance(this).barColor
-        mToolBar.setBackgroundColor(FileSelector.getInstance(this).barColor)
+        window.statusBarColor = FileSelector.barColor
+        mToolBar.setBackgroundColor( FileSelector.barColor)
         setSupportActionBar(mToolBar)
         supportActionBar?.title = "文件选择"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -72,18 +77,17 @@ class FileSelectorActivity : AppCompatActivity() {
                 mCountMenuItem!!.title = String.format(
                     getString(R.string.selected_file_count),
                     mSelectedFileList.size.toString(),
-                    FileSelector.getInstance(this@FileSelectorActivity).maxCount.toString()
+                    FileSelector.maxCount.toString()
                 )
             }
         }
-        FileSelector.getInstance(this).setThreadStop(false)
         val start = System.currentTimeMillis()
-        FileSelector.getInstance(this).worker
-            .setCallBack(object : FilesScanCallBack {
+        FilesScanWorker
+            .setCallBack(object : FilesScanWorker.FilesScanCallBack {
                 override fun onNext(fileModels: List<FileModel>) {
                     "扫描到：${fileModels.size}个文件 ${Thread.currentThread().name}".log()
                     mFileModels.addAll(fileModels)
-                    sortFileList(FileSelector.getInstance(this@FileSelectorActivity).mSortType)
+                    sortFileList(mCurrentSortType)
                     runOnUiThread {
                         mFileAdapter.notifyDataSetChanged()
                         if (mFileModels.isEmpty()) {
@@ -102,7 +106,7 @@ class FileSelectorActivity : AppCompatActivity() {
                         扫描完成，总数：${fileModels.size}个文件
                         校验：${mFileModels.size}
                     """.trimIndent().log()
-                    sortFileList(FileSelector.getInstance(this@FileSelectorActivity).mSortType)
+                    sortFileList(mCurrentSortType)
                     runOnUiThread {
                         mFileAdapter.notifyDataSetChanged()
                         if (mFileModels.isEmpty()) {
@@ -120,35 +124,38 @@ class FileSelectorActivity : AppCompatActivity() {
             }).work()
     }
 
-    private fun sortFileList(mSortType: Int) {
-        mSelectedFileList.clear()
+    private fun sortFileList(sortType: Int) {
+        if (sortType == -1) {
+            return
+        }
+        mCurrentSortType = sortType
         try {
-            when (mSortType) {
-                FileUtils.BY_NAME_ASC -> {
+            when (sortType) {
+                BY_NAME_ASC -> {
                     Collections.sort(mFileModels, SortByName())
                 }
-                FileUtils.BY_NAME_DESC -> {
+                BY_NAME_DESC -> {
                     Collections.sort(mFileModels, SortByName())
                     mFileModels.reverse()
                 }
-                FileUtils.BY_TIME_ASC -> {
+                BY_TIME_ASC -> {
                     Collections.sort(mFileModels, SortByTime())
                 }
-                FileUtils.BY_TIME_DESC -> {
+                BY_TIME_DESC -> {
                     Collections.sort(mFileModels, SortByTime())
                     mFileModels.reverse()
                 }
-                FileUtils.BY_SIZE_ASC -> {
+                BY_SIZE_ASC -> {
                     Collections.sort(mFileModels, SortBySize())
                 }
-                FileUtils.BY_SIZE_DESC -> {
+                BY_SIZE_DESC -> {
                     Collections.sort(mFileModels, SortBySize())
                     mFileModels.reverse()
                 }
-                FileUtils.BY_EXTENSION_ASC -> {
+                BY_EXTENSION_ASC -> {
                     Collections.sort(mFileModels, SortByExtension())
                 }
-                FileUtils.BY_EXTENSION_DESC -> {
+                BY_EXTENSION_DESC -> {
                     Collections.sort(mFileModels, SortByExtension())
                     mFileModels.reverse()
                 }
@@ -175,13 +182,20 @@ class FileSelectorActivity : AppCompatActivity() {
             "adapter init complete".log()
             mFileAdapter.setCountMenuItem(mCountMenuItem)
         }
-        mCountMenuItem?.title = String.format(
-            getString(R.string.selected_file_count),
-            mSelectedFileList.size.toString(),
-            FileSelector.getInstance(this@FileSelectorActivity).maxCount.toString()
-        )
+        updateMenuUI()
         return true
     }
+
+    private fun  updateMenuUI(){
+        runOnUiThread {
+            mCountMenuItem?.title = String.format(
+                getString(R.string.selected_file_count),
+                mSelectedFileList.size.toString(),
+                FileSelector.maxCount.toString()
+            )
+        }
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (mFileAdapter == null) {
@@ -196,13 +210,13 @@ class FileSelectorActivity : AppCompatActivity() {
                 return true
             }
             //不为空
-            if (FileSelector.getInstance(this@FileSelectorActivity).listener != null) {
-                FileSelector.getInstance(this@FileSelectorActivity).listener.onResult(
+            if (StartActivityUI.listener != null) {
+                StartActivityUI.listener!!.onResult(
                     mSelectedFileList
                 )
             } else {
                 val result = Intent()
-                result.putParcelableArrayListExtra(FileUtils.RESULT_KEY, mSelectedFileList)
+                result.putParcelableArrayListExtra(RESULT_KEY, mSelectedFileList)
                 setResult(RESULT_OK, result)
             }
             finish()
@@ -218,13 +232,13 @@ class FileSelectorActivity : AppCompatActivity() {
                             progressBar.visible()
                             recyclerView.gone()
                         }
-                        when (mSelectSortTypeIndex) {
-                            0 -> sortFileList(FileUtils.BY_NAME_DESC)
-                            1 -> sortFileList(FileUtils.BY_TIME_DESC)
-                            2 -> sortFileList(FileUtils.BY_SIZE_DESC)
-                            3 -> sortFileList(FileUtils.BY_EXTENSION_DESC)
-                            else -> {}
-                        }
+                        sortFileList(when (mSelectSortTypeIndex) {
+                            0 -> BY_NAME_DESC
+                            1 -> BY_TIME_DESC
+                            2 -> BY_SIZE_DESC
+                            3 -> BY_EXTENSION_DESC
+                            else -> -1
+                        })
                         runOnUiThread {
                             mFileAdapter.notifyDataSetChanged()
                             progressBar.gone()
@@ -238,13 +252,13 @@ class FileSelectorActivity : AppCompatActivity() {
                             progressBar.visible()
                             recyclerView.gone()
                         }
-                        when (mSelectSortTypeIndex) {
-                            0 -> sortFileList(FileUtils.BY_NAME_ASC)
-                            1 -> sortFileList(FileUtils.BY_TIME_ASC)
-                            2 -> sortFileList(FileUtils.BY_SIZE_ASC)
-                            3 -> sortFileList(FileUtils.BY_EXTENSION_ASC)
-                            else -> {}
-                        }
+                        sortFileList(when (mSelectSortTypeIndex) {
+                            0 -> BY_NAME_ASC
+                            1 -> BY_TIME_ASC
+                            2 -> BY_SIZE_ASC
+                            3 -> BY_EXTENSION_ASC
+                            else -> -1
+                        })
                         runOnUiThread {
                             mFileAdapter.notifyDataSetChanged()
                             progressBar.gone()
@@ -260,9 +274,8 @@ class FileSelectorActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        FileSelector.getInstance(this).setThreadStop(true)
-        if (FileSelector.getInstance(this).listener != null) {
-            FileSelector.getInstance(this).listener.onCancel()
+        if (StartActivityUI.listener != null) {
+            StartActivityUI.listener!!.onCancel()
         }
         "onBackPressed: 尝试关闭页面".log()
         GlobalThreadPools.getInstance().shutdownNow()
@@ -271,7 +284,7 @@ class FileSelectorActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        FileSelector.getInstance(this).mFileModelSet.clear()
+        FilesScanWorker.mFileModelSet.clear()
     }
 
     override fun onRequestPermissionsResult(

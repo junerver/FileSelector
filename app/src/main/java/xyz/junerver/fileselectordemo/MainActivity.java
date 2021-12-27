@@ -8,14 +8,18 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import xyz.junerver.fileselector.FileModel;
-import xyz.junerver.fileselector.FileUtils;
 import xyz.junerver.fileselector.FileSelector;
+import xyz.junerver.fileselector.FileUtils;
 import xyz.junerver.fileselector.OnResultListener;
+import xyz.junerver.fileselector.logicwork.FilesScanWorker;
+import xyz.junerver.fileselector.logicwork.StartActivityUI;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void select(View view) {
-        FileSelector
+        selectKotlin();
+    }
+
+//    private void selectJava() {
+//        FileSelector
+//                .getInstance(this)
+//                .setSelectPath("/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/")
+////                .isShowHiddenFile(true)
+//                .setBarColorRes(R.color.colorAccent)
+//                .setIgnorePath("Android", "Tencent")
+//                .setFileType(
+//                        "jpg", "gif", "png", "bmp", "jpeg", "webp", "wmv", "flv", "mp4", "avi", "mpg", "mpeg", "rmvb", "rm", "asf",
+//                        "f4v", "vob", "mkv", "3gp", "mov", "mid", "wav", "wma", "mp3", "ogg", "amr", "m4a", "3gpp", "aac", "swf",
+//                        "wps", "doc", "docx", "txt", "xlsx", "xls", "pdf", "ppt", "pptx", "zip", "rar", "7z", "exe", "gsp", "bbx",
+//                        "btx", "dat", "dws", "other", "chm", "unity3d", "xmind", "gf", "dsek")
+////                .setSortType(FileUtils.BY_NAME_ASC)
+////                .setMaxCount(1)
+////                .requestCode(1)
+//                .forResult(new OnResultListener<FileModel>() {
+//                    @Override
+//                    public void onResult(List<FileModel> result) {
+//                        for (FileModel fileModel : result) {
+//                            Log.d("bbb", fileModel.getPath());
+//                            Log.d("bbb", "~~~~~~~~~~~~~~~~");
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onCancel() {
+//                        Log.d("bbb", "onCancel");
+//                    }
+//                }).start();
+//    }
+
+    private void selectKotlin() {
+        FileSelector.Companion
                 .getInstance(this)
                 .setSelectPath("/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/")
 //                .isShowHiddenFile(true)
@@ -52,6 +91,20 @@ public class MainActivity extends AppCompatActivity {
 //                .setSortType(FileUtils.BY_NAME_ASC)
 //                .setMaxCount(1)
 //                .requestCode(1)
+//                .getWorker()
+//                .setCallBack(new FilesScanWorker.FilesScanCallBack() {
+//                    @Override
+//                    public void onNext(List<FileModel> fileModels) {
+//                        Log.d(TAG, "扫描到：" + fileModels.size() + "个文件"+Thread.currentThread().getName());
+//                    }
+//
+//                    @Override
+//                    public void onCompleted(List<FileModel> fileModels) {
+//                        Log.d(TAG, "扫描完成，总数：" + fileModels.size() + "个文件" );
+//                    }
+//                })
+//                .work();
+                .startUI()
                 .forResult(new OnResultListener<FileModel>() {
                     @Override
                     public void onResult(List<FileModel> result) {
@@ -60,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("bbb", "~~~~~~~~~~~~~~~~");
                         }
                     }
+
 
                     @Override
                     public void onCancel() {
