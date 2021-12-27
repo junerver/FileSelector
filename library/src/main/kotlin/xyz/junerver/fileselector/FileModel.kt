@@ -3,10 +3,6 @@ package xyz.junerver.fileselector
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-
-/**
- * @author Lee
- */
 @Parcelize
 data class FileModel(
     var path: String,
@@ -14,7 +10,7 @@ data class FileModel(
     var extension: String,
     var size: Long,
     var date: Long,
-):Parcelable {
+) : Parcelable {
     var isSelected = false
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

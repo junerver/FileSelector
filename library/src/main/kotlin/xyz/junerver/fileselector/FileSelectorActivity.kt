@@ -207,11 +207,10 @@ class FileSelectorActivity : AppCompatActivity() {
             }
             finish()
         } else if (i == R.id.browser_sort) {
-            mSelectSortTypeIndex = 0
             AlertDialog.Builder(this)
                 .setSingleChoiceItems(
                     R.array.sort_list,
-                    0
+                    mSelectSortTypeIndex
                 ) { _, which -> mSelectSortTypeIndex = which }
                 .setNegativeButton("降序") { _, which ->
                     Thread {
