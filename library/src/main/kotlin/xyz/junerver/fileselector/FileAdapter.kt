@@ -97,7 +97,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 )
             })
         }
-        layout.setOnClickListener { v: View? ->
+        layout.setOnClickListener { _: View? ->
             if (fileModel.isSelected) {
                 val index = findFileIndex(fileModel)
                 if (index != -1) {
@@ -129,7 +129,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
         val namePinyin = CharacterParser.getInstance().getSpelling(
             modelList[position].name
         )
-        return namePinyin.substring(0, 1).toUpperCase()
+        return namePinyin.substring(0, 1).uppercase()
     }
 
     private fun formatFileSize(size: Long): String {

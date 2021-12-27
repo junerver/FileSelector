@@ -90,31 +90,27 @@ class FileSelectorActivity : AppCompatActivity() {
                     "scanned：${fileModels.size} ".log()
                     mFileModels.addAll(fileModels)
                     sortFileList(mCurrentSortType)
-                    runOnUiThread {
-                        mFileAdapter.notifyDataSetChanged()
-                        if (mFileModels.isEmpty()) {
-                            empty.visible()
-                            recyclerView.gone()
-                        } else {
-                            progressBar.gone()
-                            empty.gone()
-                            recyclerView.visible()
-                        }
+                    mFileAdapter.notifyDataSetChanged()
+                    if (mFileModels.isEmpty()) {
+                        empty.visible()
+                        recyclerView.gone()
+                    } else {
+                        progressBar.gone()
+                        empty.gone()
+                        recyclerView.visible()
                     }
                 }
 
                 override fun onCompleted(fileModels: List<FileModel>) {
                     sortFileList(mCurrentSortType)
-                    runOnUiThread {
-                        mFileAdapter.notifyDataSetChanged()
-                        if (mFileModels.isEmpty()) {
-                            empty.visible()
-                            recyclerView.gone()
-                        } else {
-                            progressBar.gone()
-                            empty.gone()
-                            recyclerView.visible()
-                        }
+                    mFileAdapter.notifyDataSetChanged()
+                    if (mFileModels.isEmpty()) {
+                        empty.visible()
+                        recyclerView.gone()
+                    } else {
+                        progressBar.gone()
+                        empty.gone()
+                        recyclerView.visible()
                     }
                     val end = System.currentTimeMillis()
                     "scan completed，total：${fileModels.size}  time consumed: ${end - start}ms ".log()
@@ -184,13 +180,11 @@ class FileSelectorActivity : AppCompatActivity() {
     }
 
     private fun updateMenuUI() {
-        runOnUiThread {
-            mCountMenuItem?.title = String.format(
-                getString(R.string.selected_file_count),
-                mSelectedFileList.size.toString(),
-                FileSelector.maxCount.toString()
-            )
-        }
+        mCountMenuItem?.title = String.format(
+            getString(R.string.selected_file_count),
+            mSelectedFileList.size.toString(),
+            FileSelector.maxCount.toString()
+        )
     }
 
 
