@@ -6,7 +6,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import xyz.junerver.fileselector.logicwork.FilesScanWorker
-import xyz.junerver.fileselector.logicwork.StartActivityUI
+import xyz.junerver.fileselector.logicwork.ActivityUIWorker
 import java.lang.ref.SoftReference
 
 /**
@@ -73,24 +73,45 @@ class FileSelector private constructor(ctx: Context) {
         return this
     }
 
-    fun requestCode(code: Int): FileSelector {
-        requestCode = code
-        return this
+
+    /**
+    * Description: 启动内置的UI用于显示扫描结果
+    * @author Junerver
+    * @date: 2021/12/27-12:37
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
+    fun startUIWorker(): ActivityUIWorker {
+        return ActivityUIWorker(mContext)
     }
 
-    fun startUI(): StartActivityUI {
-        return StartActivityUI(mContext)
-    }
-
-    fun startWorker(): FilesScanWorker {
+    /**
+    * Description: 仅按照配置扫描文件
+    * @author Junerver
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
+    fun startScanWorker(): FilesScanWorker {
         return FilesScanWorker
     }
 
     companion object {
+        const val BY_NAME_ASC = 0
+        const val BY_NAME_DESC = 1
+        const val BY_TIME_ASC = 2
+        const val BY_TIME_DESC = 3
+        const val BY_SIZE_ASC = 4
+        const val BY_SIZE_DESC = 5
+        const val BY_EXTENSION_ASC = 6
+        const val BY_EXTENSION_DESC = 7
+
         internal var mFileTypes: Array<String> = arrayOf()
         internal var mSortType = BY_NAME_ASC
         internal var maxCount = 9
-        internal var requestCode = 0
         internal var barColor = Color.parseColor("#1bbc9b")
         internal var isShow = false
         internal var selectPaths: Array<String> = arrayOf()

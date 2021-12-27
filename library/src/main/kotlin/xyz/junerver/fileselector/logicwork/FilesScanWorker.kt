@@ -1,11 +1,9 @@
 package xyz.junerver.fileselector.logicwork
 
-import xyz.junerver.fileselector.FileModel
-import xyz.junerver.fileselector.FileSelector
+import xyz.junerver.fileselector.*
 import xyz.junerver.fileselector.FileUtils.getExtension
+import xyz.junerver.fileselector.FileUtils.getExtensionByName
 import xyz.junerver.fileselector.FileUtils.getName
-import xyz.junerver.fileselector.GlobalThreadPools
-import xyz.junerver.fileselector.MyFileFilter
 import java.io.File
 import java.io.FileFilter
 import java.util.ArrayList
@@ -23,8 +21,6 @@ object FilesScanWorker {
 
     private var mCallBack: FilesScanCallBack? = null
     var mFileModelSet = CopyOnWriteArraySet<FileModel>()
-
-    //对应路径下的文件 index 为路径
     private val mFilesIndexMap = HashMap<String, List<FileModel>>()
 
     interface FilesScanCallBack {
@@ -37,15 +33,10 @@ object FilesScanWorker {
         return this
     }
 
-    private var mFileFilter: FileFilter? = null
 
-    private fun getFiles(): List<FileModel?>? {
-        if (mFileFilter == null) {
-            mFileFilter = MyFileFilter(FileSelector.mFileTypes, FileSelector.isShow)
-        }
-        if (FileSelector.selectPaths != null && FileSelector.selectPaths.isNotEmpty()) {
+    private fun getFiles(): List<FileModel?> {
+        if (FileSelector.selectPaths.isNotEmpty()) {
             for (selectPath in FileSelector.selectPaths) {
-                //线程池开启任务
                 GlobalThreadPools.getInstance().execute { getFolderFiles(selectPath) }
             }
         }
@@ -57,75 +48,89 @@ object FilesScanWorker {
         } catch (e: InterruptedException) {
             e.printStackTrace()
         }
-        val list= ArrayList(mFileModelSet)
-        if (mCallBack != null) {
-            mCallBack!!.onCompleted(list)
+        val list = ArrayList(mFileModelSet)
+        mCallBack?.run {
+            postUI {
+                onCompleted(list)
+            }
         }
         return list
     }
 
     private fun getFolderFiles(path: String) {
-            val file = File(path)
-            val absPath = file.absolutePath
-            val files = file.listFiles(mFileFilter)
-            if (files == null || files.isEmpty()) {
-                return
-            }
-            val dirs: MutableList<File> = ArrayList()
-            val fms: MutableList<FileModel> = ArrayList()
-            for (value in files) {
-                if (value.isFile) {
-                    val pathStr = value.absolutePath
-                    val fileModel = FileModel(
-                        pathStr,
-                        getName(pathStr),
-                        getExtension(pathStr),
-                        value.length(),
-                        value.lastModified()
-                    )
-                    fms.add(fileModel)
+        val currentDir = File(path)
+        val absPath = currentDir.absolutePath
+        val files = currentDir.listFiles { file ->
+            if (file.isDirectory) {
+                !(!FileSelector.isShow && file.isHidden)
+            } else {
+                if (FileSelector.mFileTypes.isNotEmpty()) {
+                    FileSelector.mFileTypes.find {
+                        it.lowercase() == getExtensionByName(file.name).lowercase()
+                    } != null
                 } else {
-                    //加入目录
-                    dirs.add(value)
+                    !(!FileSelector.isShow && file.isHidden)
                 }
             }
-            //加入集合
-            mFileModelSet.addAll(fms)
-            if (!mFilesIndexMap.keys.contains(absPath)) {
-                mFilesIndexMap[absPath] = fms
-                //此处加入回调函数，从回调中获取每次的增量，通知UI更新
-                if (mCallBack != null) {
-                    mCallBack!!.onNext(fms)
+        }
+        if (files == null || files.isEmpty()) {
+            return
+        }
+        val dirs: MutableList<File> = ArrayList()
+        val fms: MutableList<FileModel> = ArrayList()
+        for (value in files) {
+            if (value.isFile) {
+                val pathStr = value.absolutePath
+                val fileModel = FileModel(
+                    pathStr,
+                    getName(pathStr),
+                    getExtension(pathStr),
+                    value.length(),
+                    value.lastModified()
+                )
+                fms.add(fileModel)
+            } else {
+                dirs.add(value)
+            }
+        }
+        mFileModelSet.addAll(fms)
+        if (!mFilesIndexMap.keys.contains(absPath)) {
+            mFilesIndexMap[absPath] = fms
+            //此处加入回调函数，从回调中获取每次的增量，通知UI更新
+            mCallBack?.run {
+                postUI {
+                    onNext(fms)
                 }
             }
-            //遍历其余目录
-            for (dir in dirs) {
-                val dirPath = dir!!.absolutePath
-                if (!mFilesIndexMap.keys.contains(dirPath)) {
-                    //该路径下的文件未被遍历
-                    if (FileSelector.ignorePaths != null && FileSelector.ignorePaths.isNotEmpty()) {
-                        for (ignorePath in FileSelector.ignorePaths) {
-                            if (!dirPath.toLowerCase().contains(ignorePath.toLowerCase())) {
-                                //线程池开启任务
-                                GlobalThreadPools.getInstance().execute { getFolderFiles(dirPath) }
-                            }
+        }
+        for (dir in dirs) {
+            val dirPath = dir.absolutePath
+            if (!mFilesIndexMap.keys.contains(dirPath)) {
+                //该路径下的文件未被遍历
+                if (FileSelector.ignorePaths.isNotEmpty()) {
+                    for (ignorePath in FileSelector.ignorePaths) {
+                        if (!dirPath.lowercase().contains(ignorePath.lowercase())) {
+                            GlobalThreadPools.getInstance().execute { getFolderFiles(dirPath) }
                         }
-                    } else {
-                        //线程池开启任务
-                        GlobalThreadPools.getInstance().execute { getFolderFiles(dirPath) }
                     }
+                } else {
+                    GlobalThreadPools.getInstance().execute { getFolderFiles(dirPath) }
                 }
             }
+        }
     }
 
     /**
-    * Description: 开启线程开始扫描文件
-    * @author Junerver
-    * @Version: v1.0
-    * @param
-    * @return
-    */
+     * Description: 开启线程开始扫描文件
+     * @author Junerver
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     fun work() {
+        "selectPaths: ${FileSelector.selectPaths.size}".log()
+        "ignorePaths: ${FileSelector.ignorePaths.size}".log()
+        "mFileTypes: ${FileSelector.mFileTypes.size}".log()
         mFileModelSet.clear()
         mFilesIndexMap.clear()
         Thread { getFiles() }.start()

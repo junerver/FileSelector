@@ -11,8 +11,6 @@ import xyz.junerver.fileselector.FileModel;
 import xyz.junerver.fileselector.FileSelector;
 import xyz.junerver.fileselector.FileUtils;
 import xyz.junerver.fileselector.OnResultListener;
-import xyz.junerver.fileselector.logicwork.FilesScanWorker;
-import xyz.junerver.fileselector.logicwork.StartActivityUI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                         "f4v", "vob", "mkv", "3gp", "mov", "mid", "wav", "wma", "mp3", "ogg", "amr", "m4a", "3gpp", "aac", "swf",
                         "wps", "doc", "docx", "txt", "xlsx", "xls", "pdf", "ppt", "pptx", "zip", "rar", "7z", "exe", "gsp", "bbx",
                         "btx", "dat", "dws", "other", "chm", "unity3d", "xmind", "gf", "dsek")
-//                .setSortType(FileUtils.BY_NAME_ASC)
+                .setSortType(FileSelector.BY_NAME_ASC)
 //                .setMaxCount(1)
 //                .requestCode(1)
 //                .getWorker()
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                })
 //                .work();
-                .startUI()
+                .startUIWorker()
                 .forResult(new OnResultListener<FileModel>() {
                     @Override
                     public void onResult(List<FileModel> result) {
