@@ -89,7 +89,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 mSelectedFileList!!.add(fileModel)
                 fileModel.isSelected = true
             }
-            mCountMenuItem!!.title = String.format(
+            mCountMenuItem?.title = String.format(
                 mContext.getString(R.string.selected_file_count),
                 mSelectedFileList!!.size.toString(),
                 java.lang.String.valueOf(FileSelector.maxCount)
@@ -115,7 +115,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 fileModel.isSelected = true
             }
             checkBox.setChecked(fileModel.isSelected, true)
-            mCountMenuItem!!.title = String.format(
+            mCountMenuItem?.title = String.format(
                 mContext.getString(R.string.selected_file_count),
                 mSelectedFileList!!.size.toString(),
                 java.lang.String.valueOf(FileSelector.maxCount)
@@ -127,19 +127,24 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
         val namePinyin = CharacterParser.getInstance().getSpelling(
             modelList[position].name
         )
-        return namePinyin.substring(0, 1).toUpperCase()
+        return namePinyin.substring(0, 1).uppercase()
     }
 
     private fun formatFileSize(size: Long): String {
         val df = DecimalFormat("#.00")
-        val fileSizeString: String = if (size < 1024) {
-            df.format(size.toDouble()) + "B"
-        } else if (size < 1048576) {
-            df.format(size.toDouble() / 1024) + "K"
-        } else if (size < 1073741824) {
-            df.format(size.toDouble() / 1048576) + "M"
-        } else {
-            df.format(size.toDouble() / 1073741824) + "G"
+        val fileSizeString: String = when {
+            size < 1024 -> {
+                df.format(size.toDouble()) + "B"
+            }
+            size < 1048576 -> {
+                df.format(size.toDouble() / 1024) + "K"
+            }
+            size < 1073741824 -> {
+                df.format(size.toDouble() / 1048576) + "M"
+            }
+            else -> {
+                df.format(size.toDouble() / 1073741824) + "G"
+            }
         }
         return fileSizeString
     }
