@@ -27,12 +27,12 @@ class FileSelector private constructor(ctx: Context) {
         )
     }
 
-    fun setSelectPath(vararg selects: String?): FileSelector {
+    fun setSelectPath(vararg selects: String): FileSelector {
         selectPaths = selects as Array<String>
         return this
     }
 
-    fun setIgnorePath(vararg paths: String?): FileSelector {
+    fun setIgnorePath(vararg paths: String): FileSelector {
         ignorePaths = paths as Array<String>
         return this
     }
@@ -56,7 +56,7 @@ class FileSelector private constructor(ctx: Context) {
         return this
     }
 
-    fun setFileType(vararg fileTypes: String?): FileSelector {
+    fun setFileType(vararg fileTypes: String): FileSelector {
         mFileTypes = fileTypes as Array<String>
         return this
     }

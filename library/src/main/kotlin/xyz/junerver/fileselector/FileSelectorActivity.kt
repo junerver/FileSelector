@@ -21,13 +21,12 @@ import xyz.junerver.fileselector.FileSelector.Companion.BY_SIZE_ASC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_SIZE_DESC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_ASC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_DESC
-import xyz.junerver.fileselector.FileUtils.RESULT_KEY
 import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.util.*
 
-
+const val RESULT_KEY = "extra_result"
 class FileSelectorActivity : AppCompatActivity() {
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var progressBar: ProgressBar
@@ -188,7 +187,7 @@ class FileSelectorActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mFileAdapter == null) {
+        if (!this::mFileAdapter.isInitialized) {
             toast("请等待文件加载完毕")
             return true
         }
@@ -216,7 +215,7 @@ class FileSelectorActivity : AppCompatActivity() {
                     R.array.sort_list,
                     mSelectSortTypeIndex
                 ) { _, which -> mSelectSortTypeIndex = which }
-                .setNegativeButton("降序") { _, which ->
+                .setNegativeButton("降序") { _, _ ->
                     Thread {
                         runOnUiThread {
                             progressBar.visible()
@@ -236,7 +235,7 @@ class FileSelectorActivity : AppCompatActivity() {
                         }
                     }.start()
                 }
-                .setPositiveButton("升序") { dialog, which ->
+                .setPositiveButton("升序") { _, _ ->
                     Thread {
                         runOnUiThread {
                             progressBar.visible()

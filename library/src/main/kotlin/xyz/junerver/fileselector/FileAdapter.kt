@@ -11,7 +11,6 @@ import com.bumptech.glide.Glide
 import com.lee.adapter.recyclerview.CommonAdapter
 import com.lee.adapter.recyclerview.base.ViewHolder
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView.SectionedAdapter
-import xyz.junerver.fileselector.FileUtils.getDateTime
 import java.text.DecimalFormat
 import java.util.*
 
@@ -68,7 +67,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
         )
         checkBox.setOnCheckedChangeListener(null)
         checkBox.setChecked(fileModel.isSelected, false)
-        checkBox.setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { checkBox, isChecked ->
+        checkBox.setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { cb, isChecked ->
             if (!isChecked && fileModel.isSelected) {
                 val index = findFileIndex(fileModel)
                 if (index != -1) {
@@ -82,7 +81,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                         "您最多只能选择" + FileSelector.maxCount.toString() + "个",
                         Toast.LENGTH_SHORT
                     ).show()
-                    checkBox.setChecked(false, true)
+                    cb.setChecked(false, true)
                     return@OnCheckedChangeListener
                 }
                 Log.d(TAG, "onCheckedChanged: " + fileModel.name)
@@ -95,7 +94,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 java.lang.String.valueOf(FileSelector.maxCount)
             )
         })
-        layout.setOnClickListener { v: View? ->
+        layout.setOnClickListener {
             if (fileModel.isSelected) {
                 val index = findFileIndex(fileModel)
                 if (index != -1) {

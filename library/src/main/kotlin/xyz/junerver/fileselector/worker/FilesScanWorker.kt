@@ -1,8 +1,6 @@
 package xyz.junerver.fileselector.worker
 
 import xyz.junerver.fileselector.*
-import xyz.junerver.fileselector.FileUtils.getExtension
-import xyz.junerver.fileselector.FileUtils.getExtensionByName
 import java.io.File
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
@@ -80,7 +78,7 @@ object FilesScanWorker {
                 val pathStr = value.absolutePath
                 val fileModel = FileModel(
                     pathStr,
-                    FileUtils.getFileName(pathStr),
+                    getFileName(pathStr),
                     getExtension(pathStr),
                     value.length(),
                     value.lastModified()

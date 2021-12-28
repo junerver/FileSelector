@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import xyz.junerver.fileselector.FileModel;
 import xyz.junerver.fileselector.FileSelector;
-import xyz.junerver.fileselector.FileUtils;
 import xyz.junerver.fileselector.OnResultListener;
 
 import java.util.ArrayList;
@@ -30,11 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (data != null) {
-                ArrayList<FileModel> list = data.getParcelableArrayListExtra(FileUtils.RESULT_KEY);
-                for (FileModel fileModel : list) {
-                    Log.d("aaa", fileModel.getPath());
-                    Log.d("aaa", "~~~~~~~~~~~~~~~~");
-                }
+
             }
         }
     }
