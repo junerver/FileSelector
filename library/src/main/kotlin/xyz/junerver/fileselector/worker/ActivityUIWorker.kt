@@ -14,7 +14,7 @@ import java.lang.ref.SoftReference
  * Email: junerver@gmail.com
  * Version: v1.0
  */
-class ActivityUIWorker(private val mContext: SoftReference<Context>) {
+class ActivityUIWorker(private val mSrCtx: SoftReference<Context>) {
 
 
     fun forResult(lis: OnResultListener<FileModel>): ActivityUIWorker {
@@ -23,8 +23,8 @@ class ActivityUIWorker(private val mContext: SoftReference<Context>) {
     }
 
     fun start() {
-        val intent = Intent(mContext.get(), FileSelectorActivity::class.java)
-        mContext.get()?.startActivity(intent)
+        val intent = Intent(mSrCtx.get(), FileSelectorActivity::class.java)
+        mSrCtx.get()?.startActivity(intent)
     }
 
     companion object{

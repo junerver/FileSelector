@@ -18,12 +18,12 @@ import java.lang.ref.SoftReference
  */
 class FileSelector private constructor(ctx: Context) {
     //使用软引用持有ctx对象以避免内存泄漏
-    private val mContext: SoftReference<Context> = SoftReference(ctx)
+    private val mSrCtx: SoftReference<Context> = SoftReference(ctx)
 
     init {
         selectPaths = arrayOf(
             "/storage/emulated/0/DCIM",
-            "/storage/emulated/0/Android/data/" + mContext.get()?.packageName + "/"
+            "/storage/emulated/0/Android/data/" + mSrCtx.get()?.packageName + "/"
         )
     }
 
@@ -43,7 +43,7 @@ class FileSelector private constructor(ctx: Context) {
     }
 
     fun setBarColorRes(@ColorRes barColor: Int): FileSelector {
-        return setBarColorInt(ContextCompat.getColor(mContext.get()!!, barColor))
+        return setBarColorInt(ContextCompat.getColor(mSrCtx.get()!!, barColor))
     }
 
     fun setBarColorInt(@ColorInt color: Int): FileSelector {
@@ -73,16 +73,28 @@ class FileSelector private constructor(ctx: Context) {
         return this
     }
 
-    fun requestCode(code: Int): FileSelector {
-        requestCode = code
-        return this
+    /**
+     * Description: 启动内置的UI用于显示扫描结果
+     * @author Junerver
+     * @date: 2021/12/27-12:37
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
+    fun startUIWorker(): ActivityUIWorker {
+        return ActivityUIWorker(mSrCtx)
     }
 
-    fun startUI(): ActivityUIWorker {
-        return ActivityUIWorker(mContext)
-    }
-
-    fun startWorker(): FilesScanWorker {
+    /**
+     * Description: 仅按照配置扫描文件
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
+    fun startScanWorker(): FilesScanWorker {
         return FilesScanWorker
     }
 
@@ -99,7 +111,6 @@ class FileSelector private constructor(ctx: Context) {
         internal var mFileTypes: Array<String> = arrayOf()
         internal var mSortType = BY_NAME_ASC
         internal var maxCount = 9
-        internal var requestCode = 0
         internal var barColor = Color.parseColor("#1bbc9b")
         internal var isShow = false
         internal var selectPaths: Array<String> = arrayOf()
