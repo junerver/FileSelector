@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,62 +18,26 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private TextView mTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mTextView = findViewById(R.id.text);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (data != null) {
-
-            }
-        }
-    }
 
     public void select(View view) {
         selectKotlin();
     }
 
-//    private void selectJava() {
-//        FileSelector
-//                .getInstance(this)
-//                .setSelectPath("/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/")
-////                .isShowHiddenFile(true)
-//                .setBarColorRes(R.color.colorAccent)
-//                .setIgnorePath("Android", "Tencent")
-//                .setFileType(
-//                        "jpg", "gif", "png", "bmp", "jpeg", "webp", "wmv", "flv", "mp4", "avi", "mpg", "mpeg", "rmvb", "rm", "asf",
-//                        "f4v", "vob", "mkv", "3gp", "mov", "mid", "wav", "wma", "mp3", "ogg", "amr", "m4a", "3gpp", "aac", "swf",
-//                        "wps", "doc", "docx", "txt", "xlsx", "xls", "pdf", "ppt", "pptx", "zip", "rar", "7z", "exe", "gsp", "bbx",
-//                        "btx", "dat", "dws", "other", "chm", "unity3d", "xmind", "gf", "dsek")
-////                .setSortType(FileUtils.BY_NAME_ASC)
-////                .setMaxCount(1)
-////                .requestCode(1)
-//                .forResult(new OnResultListener<FileModel>() {
-//                    @Override
-//                    public void onResult(List<FileModel> result) {
-//                        for (FileModel fileModel : result) {
-//                            Log.d("bbb", fileModel.getPath());
-//                            Log.d("bbb", "~~~~~~~~~~~~~~~~");
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onCancel() {
-//                        Log.d("bbb", "onCancel");
-//                    }
-//                }).start();
-//    }
 
     private void selectKotlin() {
+
         FileSelector.Companion
                 .getInstance(this)
-                .setSelectPath("/storage/emulated/0/DCIM", "/storage/emulated/0/Android/data/")
+                .setSelectPath("/storage/emulated/0", "/storage/emulated/0/Android/data/")
 //                .isShowHiddenFile(true)
                 .setBarColorRes(R.color.colorAccent)
 //                .setIgnorePath("Android", "Tencent")
@@ -81,10 +46,9 @@ public class MainActivity extends AppCompatActivity {
                         "f4v", "vob", "mkv", "3gp", "mov", "mid", "wav", "wma", "mp3", "ogg", "amr", "m4a", "3gpp", "aac", "swf",
                         "wps", "doc", "docx", "txt", "xlsx", "xls", "pdf", "ppt", "pptx", "zip", "rar", "7z", "exe", "gsp", "bbx",
                         "btx", "dat", "dws", "other", "chm", "unity3d", "xmind", "gf", "dsek")
-//                .setSortType(FileUtils.BY_NAME_ASC)
+                .setSortType(FileSelector.BY_NAME_ASC)
 //                .setMaxCount(1)
-//                .requestCode(1)
-//                .getWorker()
+//                .startScanWorker()
 //                .setCallBack(new FilesScanWorker.FilesScanCallBack() {
 //                    @Override
 //                    public void onNext(List<FileModel> fileModels) {
@@ -101,16 +65,18 @@ public class MainActivity extends AppCompatActivity {
                 .forResult(new OnResultListener<FileModel>() {
                     @Override
                     public void onResult(List<FileModel> result) {
+                        mTextView.setText("");
                         for (FileModel fileModel : result) {
-                            Log.d("bbb", fileModel.getPath());
-                            Log.d("bbb", "~~~~~~~~~~~~~~~~");
+                            Log.d("bbb~~~~~~~~~~~~~~~~", fileModel.getPath());
+                            Log.d("bbb~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~");
+                            mTextView.append(fileModel.getPath()+"\n\n");
                         }
                     }
 
 
                     @Override
                     public void onCancel() {
-                        Log.d("bbb", "onCancel");
+                        Log.d("bbb~~~~~~~~~~~~~~~~", "onCancel");
                     }
                 }).start();
     }
