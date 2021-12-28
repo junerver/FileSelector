@@ -12,7 +12,7 @@ import java.util.*
  * @author Lee
  */
 
-fun getDateTime(millis: Long): String {
+internal fun getDateTime(millis: Long): String {
     val cal = Calendar.getInstance()
     cal.timeInMillis = millis
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.PRC)
@@ -22,7 +22,7 @@ fun getDateTime(millis: Long): String {
 /**
  * 获取文件名
  */
-fun getNameExcludeExtension(path: String?): String {
+internal fun getNameExcludeExtension(path: String?): String {
     return try {
         var fileName = File(path).name
         val lastIndexOf = fileName.lastIndexOf(".")
@@ -38,7 +38,7 @@ fun getNameExcludeExtension(path: String?): String {
 /**
  * 获取文件名
  */
-fun getFileName(path: String): String {
+internal fun getFileName(path: String): String {
     val dotPos = path.lastIndexOf(File.separator)
     return if (dotPos >= 0) {
         path.substring(dotPos + 1)
@@ -50,7 +50,7 @@ fun getFileName(path: String): String {
 /**
  * 获取文件扩展名
  */
-fun getExtensionByName(name: String): String {
+internal fun getExtensionByName(name: String): String {
     val dotPos = name.lastIndexOf('.')
     return if (dotPos >= 0) {
         name.substring(dotPos + 1)
@@ -62,7 +62,7 @@ fun getExtensionByName(name: String): String {
 /**
  * 获取文件扩展名
  */
-fun getExtension(pathOrUrl: String): String {
+internal fun getExtension(pathOrUrl: String): String {
     val name = pathOrUrl.substring(pathOrUrl.lastIndexOf("/"))
     val dotPos = name.lastIndexOf('.')
     return if (dotPos >= 0) {
