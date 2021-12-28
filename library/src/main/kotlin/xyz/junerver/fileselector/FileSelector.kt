@@ -87,6 +87,15 @@ class FileSelector private constructor(ctx: Context) {
     }
 
     companion object {
+        const val BY_NAME_ASC = 0
+        const val BY_NAME_DESC = 1
+        const val BY_TIME_ASC = 2
+        const val BY_TIME_DESC = 3
+        const val BY_SIZE_ASC = 4
+        const val BY_SIZE_DESC = 5
+        const val BY_EXTENSION_ASC = 6
+        const val BY_EXTENSION_DESC = 7
+
         internal var mFileTypes: Array<String> = arrayOf()
         internal var mSortType = BY_NAME_ASC
         internal var maxCount = 9

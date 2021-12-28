@@ -13,6 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+import xyz.junerver.fileselector.FileSelector.Companion.BY_EXTENSION_ASC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_EXTENSION_DESC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_NAME_ASC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_NAME_DESC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_SIZE_ASC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_SIZE_DESC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_ASC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_DESC
 import xyz.junerver.fileselector.FileUtils.RESULT_KEY
 import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
 import xyz.junerver.fileselector.logicwork.FilesScanWorker
