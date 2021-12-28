@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                })
 //                .work();
-                .startUI()
+                .startUIWorker()
                 .forResult(new OnResultListener<FileModel>() {
                     @Override
                     public void onResult(List<FileModel> result) {
