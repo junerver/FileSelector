@@ -42,7 +42,7 @@ object FileUtils {
      * 获取文件名
      */
     @JvmStatic
-    fun getName(path: String): String {
+    fun getFileName(path: String): String {
         val dotPos = path.lastIndexOf(File.separator)
         return if (dotPos >= 0) {
             path.substring(dotPos + 1)

@@ -5,8 +5,8 @@ import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
-import xyz.junerver.fileselector.logicwork.FilesScanWorker
-import xyz.junerver.fileselector.logicwork.StartActivityUI
+import xyz.junerver.fileselector.worker.ActivityUIWorker
+import xyz.junerver.fileselector.worker.FilesScanWorker
 import java.lang.ref.SoftReference
 
 /**
@@ -78,8 +78,8 @@ class FileSelector private constructor(ctx: Context) {
         return this
     }
 
-    fun startUI(): StartActivityUI {
-        return StartActivityUI(mContext)
+    fun startUI(): ActivityUIWorker {
+        return ActivityUIWorker(mContext)
     }
 
     fun startWorker(): FilesScanWorker {

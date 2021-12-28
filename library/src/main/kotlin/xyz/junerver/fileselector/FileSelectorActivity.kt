@@ -23,8 +23,8 @@ import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_ASC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_DESC
 import xyz.junerver.fileselector.FileUtils.RESULT_KEY
 import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
-import xyz.junerver.fileselector.logicwork.FilesScanWorker
-import xyz.junerver.fileselector.logicwork.StartActivityUI
+import xyz.junerver.fileselector.worker.FilesScanWorker
+import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.util.*
 
 
@@ -80,54 +80,38 @@ class FileSelectorActivity : AppCompatActivity() {
 
     private fun getFiles() {
         mFileModels.clear()
-        if (mCountMenuItem != null) {
-            runOnUiThread {
-                mCountMenuItem!!.title = String.format(
-                    getString(R.string.selected_file_count),
-                    mSelectedFileList.size.toString(),
-                    FileSelector.maxCount.toString()
-                )
-            }
-        }
+        updateMenuUI()
         val start = System.currentTimeMillis()
         FilesScanWorker
             .setCallBack(object : FilesScanWorker.FilesScanCallBack {
                 override fun onNext(fileModels: List<FileModel>) {
-                    "扫描到：${fileModels.size}个文件 ${Thread.currentThread().name}".log()
+                    "scanned：${fileModels.size} ".log()
                     mFileModels.addAll(fileModels)
                     sortFileList(mCurrentSortType)
-                    runOnUiThread {
-                        mFileAdapter.notifyDataSetChanged()
-                        if (mFileModels.isEmpty()) {
-                            empty.visible()
-                            recyclerView.gone()
-                        } else {
-                            progressBar.gone()
-                            empty.gone()
-                            recyclerView.visible()
-                        }
+                    mFileAdapter.notifyDataSetChanged()
+                    if (mFileModels.isEmpty()) {
+                        empty.visible()
+                        recyclerView.gone()
+                    } else {
+                        progressBar.gone()
+                        empty.gone()
+                        recyclerView.visible()
                     }
                 }
 
                 override fun onCompleted(fileModels: List<FileModel>) {
-                    """
-                        扫描完成，总数：${fileModels.size}个文件
-                        校验：${mFileModels.size}
-                    """.trimIndent().log()
-                    sortFileList(mCurrentSortType)
-                    runOnUiThread {
-                        mFileAdapter.notifyDataSetChanged()
-                        if (mFileModels.isEmpty()) {
-                            empty.visible()
-                            recyclerView.gone()
-                        } else {
-                            progressBar.gone()
-                            empty.gone()
-                            recyclerView.visible()
-                        }
-                    }
+//                    sortFileList(mCurrentSortType)
+//                    mFileAdapter.notifyDataSetChanged()
+//                    if (mFileModels.isEmpty()) {
+//                        empty.visible()
+//                        recyclerView.gone()
+//                    } else {
+//                        progressBar.gone()
+//                        empty.gone()
+//                        recyclerView.visible()
+//                    }
                     val end = System.currentTimeMillis()
-                    "全流程耗时: ${end - start} 文件总量： ${mFileModels.size}".log()
+                    "scan completed，total：${fileModels.size}  time consumed: ${end - start}ms ".log()
                 }
             }).work()
     }
@@ -194,14 +178,12 @@ class FileSelectorActivity : AppCompatActivity() {
         return true
     }
 
-    private fun  updateMenuUI(){
-        runOnUiThread {
-            mCountMenuItem?.title = String.format(
-                getString(R.string.selected_file_count),
-                mSelectedFileList.size.toString(),
-                FileSelector.maxCount.toString()
-            )
-        }
+    private fun updateMenuUI() {
+        mCountMenuItem?.title = String.format(
+            getString(R.string.selected_file_count),
+            mSelectedFileList.size.toString(),
+            FileSelector.maxCount.toString()
+        )
     }
 
 
@@ -218,8 +200,8 @@ class FileSelectorActivity : AppCompatActivity() {
                 return true
             }
             //不为空
-            if (StartActivityUI.listener != null) {
-                StartActivityUI.listener!!.onResult(
+            if (ActivityUIWorker.listener != null) {
+                ActivityUIWorker.listener!!.onResult(
                     mSelectedFileList
                 )
             } else {
@@ -282,8 +264,8 @@ class FileSelectorActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        if (StartActivityUI.listener != null) {
-            StartActivityUI.listener!!.onCancel()
+        if (ActivityUIWorker.listener != null) {
+            ActivityUIWorker.listener!!.onCancel()
         }
         "onBackPressed: 尝试关闭页面".log()
         GlobalThreadPools.getInstance().shutdownNow()

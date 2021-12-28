@@ -11,8 +11,6 @@ import xyz.junerver.fileselector.FileModel;
 import xyz.junerver.fileselector.FileSelector;
 import xyz.junerver.fileselector.FileUtils;
 import xyz.junerver.fileselector.OnResultListener;
-import xyz.junerver.fileselector.logicwork.FilesScanWorker;
-import xyz.junerver.fileselector.logicwork.StartActivityUI;
 
 import java.util.ArrayList;
 import java.util.List;

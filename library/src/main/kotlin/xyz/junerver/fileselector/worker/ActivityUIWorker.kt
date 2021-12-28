@@ -1,4 +1,4 @@
-package xyz.junerver.fileselector.logicwork
+package xyz.junerver.fileselector.worker
 
 import android.content.Context
 import android.content.Intent
@@ -14,10 +14,10 @@ import java.lang.ref.SoftReference
  * Email: junerver@gmail.com
  * Version: v1.0
  */
-class StartActivityUI(private val mContext: SoftReference<Context>) {
+class ActivityUIWorker(private val mContext: SoftReference<Context>) {
 
 
-    fun forResult(lis: OnResultListener<FileModel>): StartActivityUI{
+    fun forResult(lis: OnResultListener<FileModel>): ActivityUIWorker {
         listener = lis
         return this
     }
