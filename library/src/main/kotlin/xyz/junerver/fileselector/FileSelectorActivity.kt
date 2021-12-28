@@ -27,16 +27,19 @@ import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.util.*
 
 const val RESULT_KEY = "extra_result"
+
 class FileSelectorActivity : AppCompatActivity() {
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var empty: TextView
-    private val mFileModels = Collections.synchronizedList(ArrayList<FileModel>())
+    private val mFileModels = ArrayList<FileModel>()
     private val mSelectedFileList = ArrayList<FileModel>()
     private var mCountMenuItem: MenuItem? = null
+
     //用户选择的排序方式索引
     private var mSelectSortTypeIndex = 0
     private lateinit var mFileAdapter: FileAdapter
+
     //用户当前选择的排序方式
     private var mCurrentSortType = FileSelector.mSortType
 
@@ -49,7 +52,7 @@ class FileSelectorActivity : AppCompatActivity() {
         val mToolBar = findViewById<Toolbar>(R.id.toolbar)
         empty = findViewById(R.id.empty)
         window.statusBarColor = FileSelector.barColor
-        mToolBar.setBackgroundColor( FileSelector.barColor)
+        mToolBar.setBackgroundColor(FileSelector.barColor)
         setSupportActionBar(mToolBar)
         supportActionBar?.title = "文件选择"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -85,8 +88,8 @@ class FileSelectorActivity : AppCompatActivity() {
             .setCallBack(object : FilesScanWorker.FilesScanCallBack {
                 override fun onNext(fileModels: List<FileModel>) {
                     "scanned：${fileModels.size} ".log()
+                    sortFileList(mCurrentSortType, fileModels as ArrayList<FileModel>)
                     mFileModels.addAll(fileModels)
-                    sortFileList(mCurrentSortType)
                     mFileAdapter.notifyDataSetChanged()
                     if (mFileModels.isEmpty()) {
                         empty.visible()
@@ -106,7 +109,7 @@ class FileSelectorActivity : AppCompatActivity() {
             }).work()
     }
 
-    private fun sortFileList(sortType: Int) {
+    private fun sortFileList(sortType: Int, list: ArrayList<FileModel>) {
         if (sortType == -1) {
             return
         }
@@ -114,32 +117,32 @@ class FileSelectorActivity : AppCompatActivity() {
         try {
             when (sortType) {
                 BY_NAME_ASC -> {
-                    Collections.sort(mFileModels, SortByName())
+                    Collections.sort(list, SortByName())
                 }
                 BY_NAME_DESC -> {
-                    Collections.sort(mFileModels, SortByName())
-                    mFileModels.reverse()
+                    Collections.sort(list, SortByName())
+                    list.reverse()
                 }
                 BY_TIME_ASC -> {
-                    Collections.sort(mFileModels, SortByTime())
+                    Collections.sort(list, SortByTime())
                 }
                 BY_TIME_DESC -> {
-                    Collections.sort(mFileModels, SortByTime())
-                    mFileModels.reverse()
+                    Collections.sort(list, SortByTime())
+                    list.reverse()
                 }
                 BY_SIZE_ASC -> {
-                    Collections.sort(mFileModels, SortBySize())
+                    Collections.sort(list, SortBySize())
                 }
                 BY_SIZE_DESC -> {
-                    Collections.sort(mFileModels, SortBySize())
-                    mFileModels.reverse()
+                    Collections.sort(list, SortBySize())
+                    list.reverse()
                 }
                 BY_EXTENSION_ASC -> {
-                    Collections.sort(mFileModels, SortByExtension())
+                    Collections.sort(list, SortByExtension())
                 }
                 BY_EXTENSION_DESC -> {
-                    Collections.sort(mFileModels, SortByExtension())
-                    mFileModels.reverse()
+                    Collections.sort(list, SortByExtension())
+                    list.reverse()
                 }
             }
         } catch (e: Exception) {
@@ -212,13 +215,15 @@ class FileSelectorActivity : AppCompatActivity() {
                             progressBar.visible()
                             recyclerView.gone()
                         }
-                        sortFileList(when (mSelectSortTypeIndex) {
-                            0 -> BY_NAME_DESC
-                            1 -> BY_TIME_DESC
-                            2 -> BY_SIZE_DESC
-                            3 -> BY_EXTENSION_DESC
-                            else -> -1
-                        })
+                        sortFileList(
+                            when (mSelectSortTypeIndex) {
+                                0 -> BY_NAME_DESC
+                                1 -> BY_TIME_DESC
+                                2 -> BY_SIZE_DESC
+                                3 -> BY_EXTENSION_DESC
+                                else -> -1
+                            }, mFileModels
+                        )
                         runOnUiThread {
                             mFileAdapter.notifyDataSetChanged()
                             progressBar.gone()
@@ -232,13 +237,15 @@ class FileSelectorActivity : AppCompatActivity() {
                             progressBar.visible()
                             recyclerView.gone()
                         }
-                        sortFileList(when (mSelectSortTypeIndex) {
-                            0 -> BY_NAME_ASC
-                            1 -> BY_TIME_ASC
-                            2 -> BY_SIZE_ASC
-                            3 -> BY_EXTENSION_ASC
-                            else -> -1
-                        })
+                        sortFileList(
+                            when (mSelectSortTypeIndex) {
+                                0 -> BY_NAME_ASC
+                                1 -> BY_TIME_ASC
+                                2 -> BY_SIZE_ASC
+                                3 -> BY_EXTENSION_ASC
+                                else -> -1
+                            }, mFileModels
+                        )
                         runOnUiThread {
                             mFileAdapter.notifyDataSetChanged()
                             progressBar.gone()

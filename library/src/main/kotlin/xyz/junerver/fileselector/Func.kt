@@ -2,7 +2,6 @@ package xyz.junerver.fileselector
 
 
 import java.io.File
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,21 +18,6 @@ internal fun getDateTime(millis: Long): String {
     return sdf.format(cal.time)
 }
 
-/**
- * 获取文件名
- */
-internal fun getNameExcludeExtension(path: String?): String {
-    return try {
-        var fileName = File(path).name
-        val lastIndexOf = fileName.lastIndexOf(".")
-        if (lastIndexOf != -1) {
-            fileName = fileName.substring(0, lastIndexOf)
-        }
-        fileName
-    } catch (e: Exception) {
-        ""
-    }
-}
 
 /**
  * 获取文件名
