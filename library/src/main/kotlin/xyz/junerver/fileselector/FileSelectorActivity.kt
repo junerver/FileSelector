@@ -206,13 +206,12 @@ class FileSelectorActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && requestCode == 999) {
-            val list = data?.getStringArrayListExtra(RESULT_KEY)
+        if (requestCode == 999) {
+            mSelectedFileList.clear()
+            mSelectedFileList.addAll(mFileModels.filter { it.isSelected })
+            mFileAdapter.notifyDataSetChanged()
+            updateMenuUI()
         }
-        mSelectedFileList.clear()
-        mSelectedFileList.addAll(mFileModels.filter { it.isSelected })
-        mFileAdapter.notifyDataSetChanged()
-        updateMenuUI()
     }
 
     override fun onBackPressed() {

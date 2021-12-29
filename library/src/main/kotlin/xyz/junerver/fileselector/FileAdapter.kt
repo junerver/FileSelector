@@ -77,10 +77,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
         checkBox.setChecked(fileModel.isSelected, false)
         checkBox.setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { cb, isChecked ->
             if (!isChecked && fileModel.isSelected) {
-                val index = findFileIndex(fileModel)
-                if (index != -1) {
-                    mSelectedFileList!!.removeAt(index)
-                }
+                mSelectedFileList?.remove(fileModel)
                 fileModel.isSelected = false
             } else if (isChecked && !fileModel.isSelected) {
                 if (mSelectedFileList!!.size >= mMaxSelect) {
@@ -104,10 +101,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
         })
         layout.setOnClickListener {
             if (fileModel.isSelected) {
-                val index = findFileIndex(fileModel)
-                if (index != -1) {
-                    mSelectedFileList!!.removeAt(index)
-                }
+                mSelectedFileList?.remove(fileModel)
                 fileModel.isSelected = false
             } else {
                 if (mSelectedFileList!!.size >= mMaxSelect) {
@@ -154,14 +148,5 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
             }
         }
         return fileSizeString
-    }
-
-    private fun findFileIndex(item: FileModel): Int {
-        for (i in mSelectedFileList!!.indices) {
-            if (mSelectedFileList!![i].path == item.path) {
-                return i
-            }
-        }
-        return -1
     }
 }

@@ -86,13 +86,6 @@ class FileSearchActivity : AppCompatActivity() {
             findViewById<ImageView>(R.id.search_go_btn).apply {
                 Glide.with(this).load(R.drawable.ic_confirm).into(this)
                 setOnClickListener {
-                    "selected：${mSelectedFileList.size} \n${mSelectedFileList.joinToString { it.name }}".log()
-                    val result = Intent()
-                    result.putStringArrayListExtra(
-                        RESULT_KEY,
-                        ArrayList(mSelectedFileList.map { it.path })
-                    )
-                    setResult(RESULT_OK, result)
                     finish()
                 }
             }
@@ -115,15 +108,12 @@ class FileSearchActivity : AppCompatActivity() {
         super.onResume()
         clearFocus()
         SoftKeyBoardListener.setListener(this, object :SoftKeyBoardListener.OnSoftKeyBoardChangeListener{
-            override fun keyBoardShow(height: Int) {
-
-            }
+            override fun keyBoardShow(height: Int) {}
 
             override fun keyBoardHide(height: Int) {
                 clearFocus()
             }
         })
-
     }
 
     private fun clearFocus(){
