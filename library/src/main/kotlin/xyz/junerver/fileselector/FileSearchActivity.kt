@@ -1,6 +1,9 @@
 package xyz.junerver.fileselector
 
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -9,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
@@ -23,16 +27,20 @@ class FileSearchActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
+    private lateinit var root: CoordinatorLayout
 
     //用于显示搜索结果
     private val mResult = ArrayList<FileModel>()
     private lateinit var mFileAdapter: FileAdapter
     private val mSelectedFileList = ArrayList<FileModel>()
     private val ro = RatcliffObershelp()
+    var mSearchItem: MenuItem? = null
+    var mSearchView:SearchView?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_search)
+        root = findViewById(R.id.root)
         val mToolBar = findViewById<Toolbar>(R.id.toolbar)
         window.statusBarColor = FileSelector.barColor
         mToolBar.setBackgroundColor(FileSelector.barColor)
@@ -49,13 +57,17 @@ class FileSearchActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.search_menu, menu)
-        val searchItem = menu?.findItem(R.id.action_search)
-        val searchView = searchItem?.actionView as SearchView?
-        searchView?.apply {
+        mSearchItem = menu?.findItem(R.id.action_search)
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        mSearchView = mSearchItem?.actionView as SearchView?
+        mSearchView?.apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
             isIconified = true
             this.setIconifiedByDefault(false)
             isSubmitButtonEnabled = true
             inputType = 1 // .setImeOptions(SearchView.);
+            isFocusableInTouchMode = true
+            findViewById<TextView>(R.id.search_src_text).hint = "搜索..."
             findViewById<TextView>(R.id.search_src_text).addTextChangedListenerDsl {
                 afterTextChanged {
                     it?.toString()?.let {
@@ -69,7 +81,6 @@ class FileSearchActivity : AppCompatActivity() {
                         mResult.sortByDescending { r -> r.similarity }
                         mFileAdapter.notifyDataSetChanged()
                     }
-
                 }
             }
             findViewById<ImageView>(R.id.search_go_btn).apply {
@@ -86,19 +97,43 @@ class FileSearchActivity : AppCompatActivity() {
                 }
             }
         }
-        searchItem?.expandActionView()
-        searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        mSearchItem?.expandActionView()
+        mSearchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                toast("案秀云Expand!")
                 return true
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                 finish()
-                return true
+                return false
             }
         })
-        return true
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        clearFocus()
+        SoftKeyBoardListener.setListener(this, object :SoftKeyBoardListener.OnSoftKeyBoardChangeListener{
+            override fun keyBoardShow(height: Int) {
+
+            }
+
+            override fun keyBoardHide(height: Int) {
+                clearFocus()
+            }
+        })
+
+    }
+
+    private fun clearFocus(){
+        mSearchView?.let {
+            it.clearFocus()
+            root.apply {
+                isFocusableInTouchMode = true
+                requestFocus()
+            }
+        }
     }
 
 }
