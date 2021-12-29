@@ -95,14 +95,22 @@ class FileSelectorActivity : AppCompatActivity() {
                         empty.visible()
                         recyclerView.gone()
                     } else {
-                        progressBar.gone()
                         empty.gone()
                         recyclerView.visible()
                     }
+                    progressBar.gone()
                 }
 
                 override fun onCompleted(fileModels: List<FileModel>) {
+                    if (mFileModels.isEmpty()) {
+                        empty.visible()
+                        recyclerView.gone()
 
+                    } else {
+                        empty.gone()
+                        recyclerView.visible()
+                    }
+                    progressBar.gone()
                     val end = System.currentTimeMillis()
                     "scan completed，total：${fileModels.size}  All time consumed: ${end - start}ms ".log()
                 }

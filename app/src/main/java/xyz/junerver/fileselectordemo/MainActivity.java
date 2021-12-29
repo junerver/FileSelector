@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         FileSelector.Companion
                 .getInstance(this)
-                .setSelectPath("/storage/emulated/0/", "/storage/emulated/0/Android/data/")
+                .setSelectPath("/storage/emulated/0/DingTalk/", "/storage/emulated/0/Android/data/")
 //                .isShowHiddenFile(true)
                 .setBarColorRes(R.color.colorAccent)
 //                .setIgnorePath("Android", "Tencent")
