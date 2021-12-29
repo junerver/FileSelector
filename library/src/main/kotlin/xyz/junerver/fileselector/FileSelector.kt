@@ -111,7 +111,7 @@ class FileSelector private constructor(ctx: Context) {
         const val BY_EXTENSION_DESC = 7
 
         internal var mFileTypes: Array<String> = arrayOf()
-        internal var mSortType = BY_NAME_ASC
+        internal var mSortType = BY_TIME_DESC
         internal var maxCount = 9
         internal var barColor = Color.parseColor("#1bbc9b")
         internal var isShow = false

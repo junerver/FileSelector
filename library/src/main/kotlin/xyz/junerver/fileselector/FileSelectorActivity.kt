@@ -118,32 +118,28 @@ class FileSelectorActivity : AppCompatActivity() {
         try {
             when (sortType) {
                 BY_NAME_ASC -> {
-                    Collections.sort(list, SortByName())
+                    list.sortBy { it.name }
                 }
                 BY_NAME_DESC -> {
-                    Collections.sort(list, SortByName())
-                    list.reverse()
+                    list.sortByDescending { it.name }
                 }
                 BY_TIME_ASC -> {
-                    Collections.sort(list, SortByTime())
+                   list.sortBy { it.date }
                 }
                 BY_TIME_DESC -> {
-                    Collections.sort(list, SortByTime())
-                    list.reverse()
+                    list.sortByDescending { it.date }
                 }
                 BY_SIZE_ASC -> {
-                    Collections.sort(list, SortBySize())
+                    list.sortBy { it.size }
                 }
                 BY_SIZE_DESC -> {
-                    Collections.sort(list, SortBySize())
-                    list.reverse()
+                    list.sortByDescending { it.size }
                 }
                 BY_EXTENSION_ASC -> {
-                    Collections.sort(list, SortByExtension())
+                    list.sortBy { it.extension }
                 }
                 BY_EXTENSION_DESC -> {
-                    Collections.sort(list, SortByExtension())
-                    list.reverse()
+                    list.sortByDescending { it.extension }
                 }
             }
         } catch (e: Exception) {
