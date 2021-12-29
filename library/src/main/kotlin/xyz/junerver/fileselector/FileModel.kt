@@ -12,9 +12,7 @@ data class FileModel(
     var size: Long,
     var date: Long,
 ) : Parcelable {
-    @IgnoredOnParcel
     var isSelected = false
-    @IgnoredOnParcel
     var similarity:Double = 0.0
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

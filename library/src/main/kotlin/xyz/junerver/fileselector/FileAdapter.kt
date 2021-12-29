@@ -19,8 +19,16 @@ import java.util.*
  */
 internal class FileAdapter(context: Context?, layoutId: Int, private val modelList: List<FileModel>) :
     CommonAdapter<FileModel>(context, layoutId, modelList), SectionedAdapter {
+
+    private var mMaxSelect = FileSelector.maxCount
+
     private var mCountMenuItem: MenuItem? = null
     private var mSelectedFileList: ArrayList<FileModel>? = null
+
+    fun setMaxSelect(max: Int) {
+        mMaxSelect = max
+    }
+
     fun setCountMenuItem(mCountMenuItem: MenuItem?) {
         this.mCountMenuItem = mCountMenuItem
     }
@@ -75,7 +83,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 }
                 fileModel.isSelected = false
             } else if (isChecked && !fileModel.isSelected) {
-                if (mSelectedFileList!!.size >= FileSelector.maxCount) {
+                if (mSelectedFileList!!.size >= mMaxSelect) {
                     Toast.makeText(
                         mContext,
                         "您最多只能选择" + FileSelector.maxCount.toString() + "个",
@@ -84,7 +92,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                     cb.setChecked(false, true)
                     return@OnCheckedChangeListener
                 }
-                Log.d(TAG, "onCheckedChanged: " + fileModel.name)
+                "onCheckedChanged: ${fileModel.name}".log()
                 mSelectedFileList!!.add(fileModel)
                 fileModel.isSelected = true
             }
@@ -102,7 +110,7 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
                 }
                 fileModel.isSelected = false
             } else {
-                if (mSelectedFileList!!.size >= FileSelector.maxCount) {
+                if (mSelectedFileList!!.size >= mMaxSelect) {
                     Toast.makeText(
                         mContext,
                         "您最多只能选择" + FileSelector.maxCount.toString() + "个",
@@ -155,9 +163,5 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
             }
         }
         return -1
-    }
-
-    companion object {
-        private const val TAG = "FileAdapter"
     }
 }

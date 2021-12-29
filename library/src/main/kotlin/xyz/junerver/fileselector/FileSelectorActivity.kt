@@ -3,6 +3,7 @@ package xyz.junerver.fileselector
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ProgressBar
@@ -178,9 +179,6 @@ class FileSelectorActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        startActivity(Intent(this, FileSearchActivity::class.java))
-        return false
-
         if (!this::mFileAdapter.isInitialized) {
             toast("请等待文件加载完毕")
             return true
@@ -197,66 +195,26 @@ class FileSelectorActivity : AppCompatActivity() {
                 ActivityUIWorker.listener!!.onResult(
                     mSelectedFileList
                 )
-            } else {
-                val result = Intent()
-                result.putParcelableArrayListExtra(RESULT_KEY, mSelectedFileList)
-                setResult(RESULT_OK, result)
             }
             finish()
         } else if (i == R.id.browser_sort) {
-            AlertDialog.Builder(this)
-                .setSingleChoiceItems(
-                    R.array.sort_list,
-                    mSelectSortTypeIndex
-                ) { _, which -> mSelectSortTypeIndex = which }
-                .setNegativeButton("降序") { _, _ ->
-                    Thread {
-                        runOnUiThread {
-                            progressBar.visible()
-                            recyclerView.gone()
-                        }
-                        sortFileList(
-                            when (mSelectSortTypeIndex) {
-                                0 -> BY_NAME_DESC
-                                1 -> BY_TIME_DESC
-                                2 -> BY_SIZE_DESC
-                                3 -> BY_EXTENSION_DESC
-                                else -> -1
-                            }, mFileModels
-                        )
-                        runOnUiThread {
-                            mFileAdapter.notifyDataSetChanged()
-                            progressBar.gone()
-                            recyclerView.visible()
-                        }
-                    }.start()
-                }
-                .setPositiveButton("升序") { _, _ ->
-                    Thread {
-                        runOnUiThread {
-                            progressBar.visible()
-                            recyclerView.gone()
-                        }
-                        sortFileList(
-                            when (mSelectSortTypeIndex) {
-                                0 -> BY_NAME_ASC
-                                1 -> BY_TIME_ASC
-                                2 -> BY_SIZE_ASC
-                                3 -> BY_EXTENSION_ASC
-                                else -> -1
-                            }, mFileModels
-                        )
-                        runOnUiThread {
-                            mFileAdapter.notifyDataSetChanged()
-                            progressBar.gone()
-                            recyclerView.visible()
-                        }
-                    }.start()
-                }
-                .setTitle("请选择")
-                .show()
+            val i = Intent(this, FileSearchActivity::class.java)
+            //还能选多少
+            i.putExtra("remainder", FileSelector.maxCount - mSelectedFileList.size)
+            startActivityForResult(i,999)
         }
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK && requestCode == 999) {
+            val list = data?.getStringArrayListExtra(RESULT_KEY)
+        }
+        mSelectedFileList.clear()
+        mSelectedFileList.addAll(mFileModels.filter { it.isSelected })
+        mFileAdapter.notifyDataSetChanged()
+        updateMenuUI()
     }
 
     override fun onBackPressed() {
