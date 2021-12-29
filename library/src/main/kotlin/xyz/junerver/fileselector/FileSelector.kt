@@ -16,6 +16,8 @@ import java.lang.ref.SoftReference
  * Email: junerver@gmail.com
  * Version: v1.0
  */
+
+const val VERSION = "0.0.9"
 class FileSelector private constructor(ctx: Context) {
     //使用软引用持有ctx对象以避免内存泄漏
     private val mSrCtx: SoftReference<Context> = SoftReference(ctx)
@@ -118,6 +120,7 @@ class FileSelector private constructor(ctx: Context) {
         private var instance: FileSelector? = null
 
         fun getInstance(context: Context): FileSelector {
+            "++++++++++++++++++ Versin: $VERSION ++++++++++++++++++++++".log()
             if (instance == null) {
                 instance = FileSelector(context)
             }

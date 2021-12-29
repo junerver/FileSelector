@@ -89,8 +89,9 @@ class FileSelectorActivity : AppCompatActivity() {
                 override fun onNext(fileModels: List<FileModel>) {
                     "scanned：${fileModels.size} ".log()
                     sortFileList(mCurrentSortType, fileModels as ArrayList<FileModel>)
+                    val lastIndex = mFileModels.size
                     mFileModels.addAll(fileModels)
-                    mFileAdapter.notifyDataSetChanged()
+                    mFileAdapter.notifyItemRangeInserted(lastIndex, fileModels.size)
                     if (mFileModels.isEmpty()) {
                         empty.visible()
                         recyclerView.gone()
@@ -264,14 +265,8 @@ class FileSelectorActivity : AppCompatActivity() {
         if (ActivityUIWorker.listener != null) {
             ActivityUIWorker.listener!!.onCancel()
         }
-        "onBackPressed: 尝试关闭页面".log()
         GlobalThreadPools.getInstance().shutdownNow()
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        FilesScanWorker.mFileModelSet.clear()
     }
 
     override fun onRequestPermissionsResult(

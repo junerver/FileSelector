@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 object FilesScanWorker {
 
     private var mCallBack: FilesScanCallBack? = null
-    var mFileModelSet = CopyOnWriteArraySet<FileModel>()
+    private val mFileModelSet = CopyOnWriteArraySet<FileModel>()
     private val mFilesIndexMap = HashMap<String, List<FileModel>>()
 
     interface FilesScanCallBack {
@@ -49,6 +49,9 @@ object FilesScanWorker {
                 onCompleted(list)
             }
         }
+        "Done paths: ${mFilesIndexMap.size}  files:${mFileModelSet.size}".log()
+        mFileModelSet.clear()
+        mFilesIndexMap.clear()
         return list
     }
 
@@ -68,7 +71,7 @@ object FilesScanWorker {
                 }
             }
         }
-        if (files == null || files.isEmpty()) {
+        if (files.isNullOrEmpty()) {
             return
         }
         val dirs: MutableList<File> = ArrayList()

@@ -52,10 +52,10 @@ class SortBySize : Comparator<FileModel?> {
                 1
             }
         } else {
-            if (f1.size < f2.size) {
-                -1
-            } else {
-                1
+            when {
+                f1.size > f2.size -> 1
+                f1.size < f2.size -> -1
+                else -> 0
             }
         }
     }
@@ -70,10 +70,10 @@ class SortByTime : Comparator<FileModel?> {
                 1
             }
         } else {
-            if (f1.date > f2.date) {
-                1
-            } else {
-                -1
+            when {
+                f1.date > f2.date -> 1
+                f1.date < f2.date -> -1
+                else -> 0
             }
         }
     }

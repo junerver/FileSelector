@@ -1,13 +1,6 @@
 package xyz.junerver.fileselector;
 
-/**
- * Description:
- *
- * @author Junerver
- * date: 2021/12/24-16:15
- * Email: junerver@gmail.com
- * Version: v1.0
- */
+import android.util.Log;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,7 +27,7 @@ public class GlobalThreadPools {
     //线程闲置后的存活时间
     private static final int KEEP_ALIVE_SECONDS = 60;
     //任务队列
-    private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<>(CPU_COUNT);
+    private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<>();
     //线程工厂
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
@@ -87,9 +80,11 @@ public class GlobalThreadPools {
      */
     public boolean hasDone() {
         if (THREAD_POOL_EXECUTOR != null) {
+//            Log.d("FileSelector","queue: "+THREAD_POOL_EXECUTOR.getQueue().size()+"  active: " +THREAD_POOL_EXECUTOR.getActiveCount());
             return THREAD_POOL_EXECUTOR.getQueue().size() + THREAD_POOL_EXECUTOR.getActiveCount() == 0;
         } else {
             //线程池已经置空任务结束
+//            Log.d("FileSelector","++++++++++++++++++++++  null  ++++++++++++++++++++");
             return true;
         }
     }
