@@ -29,8 +29,8 @@ import java.util.*
 const val RESULT_KEY = "extra_result"
 
 class FileSelectorActivity : AppCompatActivity() {
-    private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var progressBar: ProgressBar
+    private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
     private val mFileModels = ArrayList<FileModel>()
     private val mSelectedFileList = ArrayList<FileModel>()
@@ -182,6 +182,9 @@ class FileSelectorActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        startActivity(Intent(this, FileSearchActivity::class.java))
+        return false
+
         if (!this::mFileAdapter.isInitialized) {
             toast("请等待文件加载完毕")
             return true

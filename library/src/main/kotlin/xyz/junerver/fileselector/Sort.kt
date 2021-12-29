@@ -9,7 +9,7 @@ import java.util.Comparator
  * Email: junerver@gmail.com
  * Version: v1.0
  */
-class SortByExtension : Comparator<FileModel?> {
+internal class SortByExtension : Comparator<FileModel?> {
     override fun compare(f1: FileModel?, f2: FileModel?): Int {
         return if (f1 == null || f2 == null) {
             if (f1 == null) {
@@ -29,7 +29,7 @@ class SortByExtension : Comparator<FileModel?> {
     }
 }
 
-class SortByName : Comparator<FileModel?> {
+internal class SortByName : Comparator<FileModel?> {
     override fun compare(f1: FileModel?, f2: FileModel?): Int {
         return if (f1 == null || f2 == null) {
             if (f1 == null) {
@@ -43,7 +43,7 @@ class SortByName : Comparator<FileModel?> {
     }
 }
 
-class SortBySize : Comparator<FileModel?> {
+internal class SortBySize : Comparator<FileModel?> {
     override fun compare(f1: FileModel?, f2: FileModel?): Int {
         return if (f1 == null || f2 == null) {
             if (f1 == null) {
@@ -61,7 +61,7 @@ class SortBySize : Comparator<FileModel?> {
     }
 }
 
-class SortByTime : Comparator<FileModel?> {
+internal class SortByTime : Comparator<FileModel?> {
     override fun compare(f1: FileModel?, f2: FileModel?): Int {
         return if (f1 == null || f2 == null) {
             if (f1 == null) {

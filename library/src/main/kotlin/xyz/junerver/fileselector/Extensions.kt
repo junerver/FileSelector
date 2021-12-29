@@ -3,8 +3,11 @@ package xyz.junerver.fileselector
 import android.app.Activity
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -79,4 +82,52 @@ fun <T> T.postUI(action: () -> Unit) {
 object KitUtil{
     val handler: Handler by lazy {  Handler(Looper.getMainLooper()) }
 }
+
+//region DSL实现的监听器
+fun TextView.addTextChangedListenerDsl(init: TextChangedListenerDsl.() -> Unit) {
+    val listener = TextChangedListenerDsl()
+    listener.init()
+    this.addTextChangedListener(listener)
+}
+
+class TextChangedListenerDsl : TextWatcher {
+
+    private var afterTextChanged: ((Editable?) -> Unit)? = null
+
+    private var beforeTextChanged: ((CharSequence?, Int, Int, Int) -> Unit)? = null
+
+    private var onTextChanged: ((CharSequence?, Int, Int, Int) -> Unit)? = null
+
+    /**
+     * DSL方法
+     */
+    fun afterTextChanged(method: (Editable?) -> Unit) {
+        afterTextChanged = method
+    }
+
+    fun beforeTextChanged(method: (CharSequence?, Int, Int, Int) -> Unit) {
+        beforeTextChanged = method
+    }
+
+    fun onTextChanged(method: (CharSequence?, Int, Int, Int) -> Unit) {
+        onTextChanged = method
+    }
+
+    /**
+     * 原始方法
+     */
+    override fun afterTextChanged(s: Editable?) {
+        afterTextChanged?.invoke(s)
+    }
+
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        beforeTextChanged?.invoke(s, start, count, after)
+    }
+
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+        onTextChanged?.invoke(s, start, before, count)
+    }
+
+}
+//endregion
 
