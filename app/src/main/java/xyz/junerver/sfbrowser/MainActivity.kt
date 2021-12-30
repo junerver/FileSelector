@@ -127,7 +127,8 @@ class MainActivity : FileSelectorActivity() {
                             }
                             2 -> {
                                 //获取剪贴板管理器：
-                                val cm: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val cm: ClipboardManager =
+                                    getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 // 创建普通字符型ClipData
                                 val mClipData = ClipData.newPlainText("SFbrowser", path)
                                 // 将ClipData内容放到系统剪贴板里。
@@ -136,15 +137,15 @@ class MainActivity : FileSelectorActivity() {
                             }
                             3 -> {
                                 XPopup.Builder(mContext)
-                                    .asCustom(FileDetailsPopup(mContext,fileModel))
+                                    .asCustom(FileDetailsPopup(mContext, fileModel))
                                     .show()
                             }
                             4 -> {
                                 if (oldFile.exists() && oldFile.isFile) {
                                     XPopup.Builder(mContext).asInputConfirm(
-                                        "重命名", ""
+                                        "重命名", "", getNameExcludeExtension(path), null
                                     ) { text ->
-                                        val newName = text+".${fileModel.extension}"
+                                        val newName = text + ".${fileModel.extension}"
                                         if (newName.isValidFileName()) {
                                             val target =
                                                 File(oldFile.parent + File.separator + newName)

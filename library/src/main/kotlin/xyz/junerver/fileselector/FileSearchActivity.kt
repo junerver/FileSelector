@@ -132,4 +132,19 @@ open class FileSearchActivity : AppCompatActivity() {
         }
     }
 
+    protected fun delItem(fileModel: FileModel) {
+        val index = mResult.indexOf(fileModel)
+        if (index != -1) {
+            mResult.remove(fileModel)
+            mFileAdapter.notifyItemRemoved(index)
+        }
+    }
+
+    protected fun changeItem(fileModel: FileModel) {
+        val index = mResult.indexOf(fileModel)
+        if (index != -1) {
+            mFileAdapter.notifyItemChanged(index)
+        }
+    }
+
 }

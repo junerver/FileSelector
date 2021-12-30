@@ -33,6 +33,18 @@ internal fun getFileName(path: String): String {
     }
 }
 
+fun getNameExcludeExtension(path: String): String {
+    return try {
+        var fileName = getFileName(path)
+        val lastIndexOf = fileName.lastIndexOf(".")
+        if (lastIndexOf != -1) {
+            fileName = fileName.substring(0, lastIndexOf)
+        }
+        fileName
+    } catch (e: Exception) {
+        ""
+    }
+}
 /**
  * 获取文件扩展名
  */
