@@ -117,6 +117,14 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
                 gone()
             }
         }
+        val flag = holder.getView<ImageView>(R.id.iv_data_flag)
+        flag.apply {
+            if (fileModel.isAndroidData) {
+                visible()
+            } else {
+                gone()
+            }
+        }
         val layout = holder.getView<RelativeLayout>(R.id.layout_item)
         layout.setOnClickListener {
             if (isSelectorMode) {

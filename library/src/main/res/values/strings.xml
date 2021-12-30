@@ -5,5 +5,6 @@
         <item>按时间</item>
         <item>按大小</item>
         <item>按类型</item>
+        <item>按目录</item>
     </string-array>
 </resources>

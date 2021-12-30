@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_item"
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:background="?android:attr/selectableItemBackground"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp">
+    android:paddingLeft="10dp">
 
     <xyz.junerver.fileselector.SmoothCheckBox
         android:id="@+id/checkbox"
@@ -56,4 +56,13 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_data_flag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:src="@drawable/ic_data_flag" />
 </RelativeLayout>

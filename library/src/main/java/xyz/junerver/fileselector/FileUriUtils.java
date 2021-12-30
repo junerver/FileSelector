@@ -12,6 +12,8 @@ import android.text.TextUtils;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import java.io.FileFilter;
+
 /**
  * Description:
  *
@@ -65,7 +67,19 @@ public class FileUriUtils {
         return "content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary%3A" + path2;
     }
 
-    //转换至uriTree的路径
+    /**
+     * 通过已知的路径获取DoucmentFile对象，但是该对象不是UriTree对象不能使用listFile函数 否则会抛出异常
+     * 这是谷歌对没有授权的子文件夹目录进行了限制，
+     * 不让你直接通过TreeUri生成正确的Document对象，
+     * 至少在Android/data目录是这样的。
+     * 直接通过DocumentFile.fromTreeUri函数无论怎么调用，最终结果都是一样
+     * 即便生成的是Android/data目录下子文件的正确URI，再生成DocumentFile对象，
+     * 还是不行，因为你生成的DocumentFile对象始终指向Android/data(也就是你授权过的那个目录),
+     * 此题无解！
+     * @param context
+     * @param path
+     * @return
+     */
     public static DocumentFile getDoucmentFile(Context context, String path) {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
@@ -75,7 +89,12 @@ public class FileUriUtils {
     }
 
 
-    //转换至uriTree的路径
+    /**
+     * 转换至uriTree的路径
+     * ** 注意： 此方法只能用来转换授权目录下的子路径 将它变换成便利时对照的Uri **
+     * @param path
+     * @return
+     */
     public static String changeToUri2(String path) {
         String[] paths = path.replaceAll("/storage/emulated/0/Android/data", "").split("/");
         StringBuilder stringBuilder = new StringBuilder("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary%3AAndroid%2Fdata");
@@ -88,7 +107,12 @@ public class FileUriUtils {
     }
 
 
-    //转换至uriTree的路径
+    /**
+     * 转换至uriTree的路径
+     * ** 注意： 此方法只能用来转换已授权的目录路径 **
+     * @param path
+     * @return
+     */
     public static String changeToUri3(String path) {
         path = path.replace("/storage/emulated/0/", "").replace("/", "%2F");
         return ("content://com.android.externalstorage.documents/tree/primary%3A" + path);

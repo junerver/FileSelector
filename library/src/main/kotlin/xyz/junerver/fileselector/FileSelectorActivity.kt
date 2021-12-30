@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+import xyz.junerver.fileselector.FileSelector.Companion.BY_DATA_ASC
+import xyz.junerver.fileselector.FileSelector.Companion.BY_DATA_DESC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_EXTENSION_ASC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_EXTENSION_DESC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_NAME_ASC
@@ -28,6 +30,7 @@ import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_DESC
 import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import xyz.junerver.fileselector.worker.ActivityUIWorker
+import java.lang.ref.SoftReference
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -44,10 +47,11 @@ open class FileSelectorActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
-    protected open lateinit var mToolBar:Toolbar
+    protected open lateinit var mToolBar: Toolbar
 
     private val mFileModels = ArrayList<FileModel>()
     private val mSelectedFileList = ArrayList<FileModel>()
+
     //显示选择数量的menu
     private var mCountMenuItem: MenuItem? = null
     private var mSortMenuItem: MenuItem? = null
@@ -55,6 +59,7 @@ open class FileSelectorActivity : AppCompatActivity() {
     //用户选择的排序方式索引
     private var mSelectSortTypeIndex = 0
     protected lateinit var mFileAdapter: FileAdapter
+
     //是否为选择器模式
     protected open var isSelectorMode = true
 
@@ -120,7 +125,7 @@ open class FileSelectorActivity : AppCompatActivity() {
     }
 
     protected open fun initAdapter() {
-        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mFileModels,isSelectorMode)
+        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mFileModels, isSelectorMode)
         mFileAdapter.setSelectedFileList(mSelectedFileList)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = mFileAdapter
@@ -129,7 +134,7 @@ open class FileSelectorActivity : AppCompatActivity() {
         }
     }
 
-    protected open  fun openSearchUI(clazz: KClass<out FileSearchActivity> = FileSearchActivity::class ) {
+    protected open fun openSearchUI(clazz: KClass<out FileSearchActivity> = FileSearchActivity::class) {
         val i = Intent(this, clazz.java)
         //还能选多少
         i.putExtra("remainder", FileSelector.maxCount - mSelectedFileList.size)
@@ -141,10 +146,9 @@ open class FileSelectorActivity : AppCompatActivity() {
         mFileModels.clear()
         updateMenuUI()
         val start = System.currentTimeMillis()
-        FilesScanWorker
+        FilesScanWorker(SoftReference(mContext))
             .setCallBack(object : FilesScanWorker.FilesScanCallBack {
                 override fun onNext(fileModels: List<FileModel>) {
-                    "scanned：${fileModels.size} ".log()
                     sortFileList(mCurrentSortType, fileModels as ArrayList<FileModel>)
                     val lastIndex = mFileModels.size
                     mFileModels.addAll(fileModels)
@@ -221,6 +225,12 @@ open class FileSelectorActivity : AppCompatActivity() {
                 BY_EXTENSION_DESC -> {
                     list.sortByDescending { it.extension }
                 }
+                BY_DATA_ASC->{
+                    list.sortBy { it.isAndroidData }
+                }
+                BY_DATA_DESC->{
+                    list.sortByDescending { it.isAndroidData }
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -271,7 +281,7 @@ open class FileSelectorActivity : AppCompatActivity() {
             finish()
         } else if (i == R.id.search_file) {
             openSearchUI()
-        }else if (i == R.id.browser_sort) {
+        } else if (i == R.id.browser_sort) {
             AlertDialog.Builder(this)
                 .setSingleChoiceItems(
                     R.array.sort_list,
@@ -289,6 +299,7 @@ open class FileSelectorActivity : AppCompatActivity() {
                                 1 -> BY_TIME_DESC
                                 2 -> BY_SIZE_DESC
                                 3 -> BY_EXTENSION_DESC
+                                4 -> BY_DATA_DESC
                                 else -> -1
                             }, mFileModels
                         )
@@ -311,6 +322,7 @@ open class FileSelectorActivity : AppCompatActivity() {
                                 1 -> BY_TIME_ASC
                                 2 -> BY_SIZE_ASC
                                 3 -> BY_EXTENSION_ASC
+                                4 -> BY_DATA_ASC
                                 else -> -1
                             }, mFileModels
                         )

@@ -133,7 +133,7 @@ class FileSelector private constructor(ctx: Context) {
      * @return
      */
     fun startScanWorker(): FilesScanWorker {
-        return FilesScanWorker
+        return FilesScanWorker(mSrCtx)
     }
 
     companion object {
@@ -145,6 +145,8 @@ class FileSelector private constructor(ctx: Context) {
         const val BY_SIZE_DESC = 5
         const val BY_EXTENSION_ASC = 6
         const val BY_EXTENSION_DESC = 7
+        const val BY_DATA_ASC = 8
+        const val BY_DATA_DESC = 9
 
         val IMAGE_TYPES: Array<String> = arrayOf(
             "bmp","jpeg","jpg","png","tif","gif","pcx","tga","exif","fpx","svg","psd","cdr","pcd","dxf","ufo","eps","ai","raw","WMF","webp","avif","apng"
@@ -159,11 +161,11 @@ class FileSelector private constructor(ctx: Context) {
         internal var isShowHidden = false
         internal var selectPaths: Array<String> =arrayOf(
             "/storage/emulated/0/",
-            "/storage/emulated/0/Android/data/"
+            "/storage/emulated/0/Android/data/",
         )
         internal var ignorePaths: Array<String> = arrayOf()
         private var instance: FileSelector? = null
-        internal var isDebugLog = false
+        internal var isDebugLog = true
 
         fun getInstance(context: Context): FileSelector {
             "++++++++++++++++++ Versin: $VERSION ++++++++++++++++++++++".log()
