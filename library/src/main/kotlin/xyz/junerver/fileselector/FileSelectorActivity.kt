@@ -59,7 +59,7 @@ open class FileSelectorActivity : AppCompatActivity() {
 
     //用户当前选择的排序方式
     private var mCurrentSortType = FileSelector.mSortType
-    private lateinit var mContext: Context
+    protected open lateinit var mContext: Context
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

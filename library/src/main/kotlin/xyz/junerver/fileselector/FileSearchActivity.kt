@@ -36,10 +36,12 @@ open class FileSearchActivity : AppCompatActivity() {
     private val ro = RatcliffObershelp()
     var mSearchItem: MenuItem? = null
     var mSearchView:SearchView?= null
+    protected open lateinit var mContext: Context
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_search)
+        mContext = this
         root = findViewById(R.id.root)
         val mToolBar = findViewById<Toolbar>(R.id.toolbar)
         window.statusBarColor = FileSelector.barColor

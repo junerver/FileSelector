@@ -11,8 +11,7 @@ import android.content.Context
 
 import android.content.Intent
 import android.net.Uri
-
-
+import java.text.DecimalFormat
 
 
 /**
@@ -64,4 +63,23 @@ fun getExtension(pathOrUrl: String): String {
     } else {
         "?"
     }
+}
+
+fun formatFileSize(size: Long): String {
+    val df = DecimalFormat("#.00")
+    val fileSizeString: String = when {
+        size < 1024 -> {
+            df.format(size.toDouble()) + "B"
+        }
+        size < 1048576 -> {
+            df.format(size.toDouble() / 1024) + "K"
+        }
+        size < 1073741824 -> {
+            df.format(size.toDouble() / 1048576) + "M"
+        }
+        else -> {
+            df.format(size.toDouble() / 1073741824) + "G"
+        }
+    }
+    return fileSizeString
 }

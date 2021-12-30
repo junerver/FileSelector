@@ -26,9 +26,14 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
     //选择的文件
     private var mSelectedFileList: ArrayList<FileModel>? = null
 
-    private var openItemListener: (path: String) -> Unit = {  }
+    interface BrowserItemListener{
+        fun onItemClick(path: String)
+        fun onItemLongClick(path: String)
+    }
 
-    fun setListener(listener: (path: String) -> Unit) {
+    private var openItemListener: BrowserItemListener ?= null
+
+    fun setListener(listener: BrowserItemListener) {
         openItemListener = listener
     }
 
@@ -138,9 +143,15 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
                 )
             } else {
                 //打开
-                openItemListener(fileModel.path)
+                openItemListener?.onItemClick(fileModel.path)
             }
 
+        }
+        layout.setOnLongClickListener{
+            if (!isSelectorMode) {
+                openItemListener?.onItemLongClick(fileModel.path)
+            }
+            true
         }
     }
 
@@ -149,24 +160,5 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
             modelList[position].name
         )
         return namePinyin.substring(0, 1).uppercase()
-    }
-
-    private fun formatFileSize(size: Long): String {
-        val df = DecimalFormat("#.00")
-        val fileSizeString: String = when {
-            size < 1024 -> {
-                df.format(size.toDouble()) + "B"
-            }
-            size < 1048576 -> {
-                df.format(size.toDouble() / 1024) + "K"
-            }
-            size < 1073741824 -> {
-                df.format(size.toDouble() / 1048576) + "M"
-            }
-            else -> {
-                df.format(size.toDouble() / 1073741824) + "G"
-            }
-        }
-        return fileSizeString
     }
 }
