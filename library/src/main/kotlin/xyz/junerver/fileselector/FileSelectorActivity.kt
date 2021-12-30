@@ -27,6 +27,7 @@ import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.util.*
+import kotlin.reflect.KClass
 
 
 const val RESULT_KEY = "extra_result"
@@ -113,7 +114,7 @@ open class FileSelectorActivity : AppCompatActivity() {
         mToolBar.setNavigationOnClickListener { onBackPressed() }
     }
 
-    private fun initAdapter() {
+    protected open fun initAdapter() {
         mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mFileModels,isSelectorMode)
         mFileAdapter.setSelectedFileList(mSelectedFileList)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -121,6 +122,14 @@ open class FileSelectorActivity : AppCompatActivity() {
         if (mCountMenuItem != null) {
             mFileAdapter.setCountMenuItem(mCountMenuItem)
         }
+    }
+
+    protected open  fun openSearchUI(clazz: KClass<out FileSearchActivity> = FileSearchActivity::class ) {
+        val i = Intent(this, clazz.java)
+        //还能选多少
+        i.putExtra("remainder", FileSelector.maxCount - mSelectedFileList.size)
+        i.putExtra(EXTRA_IS_SELECTOR_MODE, isSelectorMode)
+        startActivityForResult(i, REQUEST_CODE_SEARCH_FILES)
     }
 
     private fun getFiles() {
@@ -239,11 +248,7 @@ open class FileSelectorActivity : AppCompatActivity() {
             }
             finish()
         } else if (i == R.id.search_file) {
-            val i = Intent(this, FileSearchActivity::class.java)
-            //还能选多少
-            i.putExtra("remainder", FileSelector.maxCount - mSelectedFileList.size)
-            i.putExtra(EXTRA_IS_SELECTOR_MODE, isSelectorMode)
-            startActivityForResult(i, REQUEST_CODE_SEARCH_FILES)
+            openSearchUI()
         }
         return true
     }

@@ -4,6 +4,16 @@ package xyz.junerver.fileselector
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import android.widget.Toast
+
+import android.content.ActivityNotFoundException
+import android.content.Context
+
+import android.content.Intent
+import android.net.Uri
+
+
+
 
 /**
  * 文件处理
@@ -34,7 +44,7 @@ internal fun getFileName(path: String): String {
 /**
  * 获取文件扩展名
  */
-internal fun getExtensionByName(name: String): String {
+fun getExtensionByName(name: String): String {
     val dotPos = name.lastIndexOf('.')
     return if (dotPos >= 0) {
         name.substring(dotPos + 1)
@@ -46,7 +56,7 @@ internal fun getExtensionByName(name: String): String {
 /**
  * 获取文件扩展名
  */
-internal fun getExtension(pathOrUrl: String): String {
+fun getExtension(pathOrUrl: String): String {
     val name = pathOrUrl.substring(pathOrUrl.lastIndexOf("/"))
     val dotPos = name.lastIndexOf('.')
     return if (dotPos >= 0) {

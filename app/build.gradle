@@ -6,7 +6,7 @@ android {
     compileSdkVersion project.ext.compileSdkVersion
     buildToolsVersion project.ext.buildToolsVersion
     defaultConfig {
-        applicationId "xyz.junerver.fileselectordemo"
+        applicationId "xyz.junerver.fsbrowser"
         minSdkVersion project.ext.minSdkVersion
         targetSdkVersion project.ext.targetSdkVersion
         versionCode project.ext.versionCode

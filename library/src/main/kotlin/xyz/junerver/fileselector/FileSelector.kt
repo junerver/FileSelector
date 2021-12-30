@@ -146,6 +146,12 @@ class FileSelector private constructor(ctx: Context) {
         const val BY_EXTENSION_ASC = 6
         const val BY_EXTENSION_DESC = 7
 
+        val IMAGE_TYPES: Array<String> = arrayOf(
+            "bmp","jpeg","jpg","png","tif","gif","pcx","tga","exif","fpx","svg","psd","cdr","pcd","dxf","ufo","eps","ai","raw","WMF","webp","avif","apng"
+        )
+        val VIDEO_TYPES: Array<String> = arrayOf()
+        val DOC_TYPES: Array<String> = arrayOf()
+
         internal var mFileTypes: Array<String> = arrayOf()
         internal var mSortType = BY_TIME_DESC
         internal var maxCount = 9

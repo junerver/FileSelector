@@ -1,13 +1,9 @@
-package xyz.junerver.fileselectordemo
+package xyz.junerver.fsbrowser
 
 import android.Manifest
 import android.content.Intent
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.TextView
-import android.util.Log
-import android.view.View
-import android.widget.Toast
 import xyz.junerver.fileselector.*
 
 class SplashActivity : AppCompatActivity() {

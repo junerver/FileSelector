@@ -1,9 +1,11 @@
 package xyz.junerver.fileselector
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -15,7 +17,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import java.io.File
 
 
 fun AppCompatActivity.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -151,4 +155,28 @@ fun Context.showManagerFileTips(cancel: () -> Unit = {}, request: (intent: Inten
             request(intent)
         }
         .show()
+}
+
+fun Context.getUriForFile(file: File): Uri {
+    return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+        FileProvider.getUriForFile(
+            this.applicationContext,
+            "${this.packageName}.fileprovider",
+            file)
+    } else {
+        Uri.fromFile(file)
+    }
+}
+
+fun Context.openFile(file:String){
+    try {
+        val intent = Intent()
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.action = Intent.ACTION_VIEW
+        intent.setDataAndType(this.getUriForFile(File(file)), MapTable.getMIMEType(file))
+        this.startActivity(intent)
+        Intent.createChooser(intent, "请选择对应的软件打开该附件！")
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(this, "sorry附件不能打开，请下载相关软件！", Toast.LENGTH_SHORT).show()
+    }
 }

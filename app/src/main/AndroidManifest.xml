@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="xyz.junerver.fileselectordemo">
+    package="xyz.junerver.fsbrowser">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,10 +14,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="xyz.junerver.fsbrowser.PictureActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name="xyz.junerver.fsbrowser.MainActivity"
+            android:exported="false" />
+        <activity
+            android:name="xyz.junerver.fsbrowser.OpenSearchActivity"
+            android:exported="false" />
+        <activity
+            android:name="xyz.junerver.fsbrowser.SplashActivity"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize"
             android:exported="true">
             <intent-filter>
@@ -26,6 +32,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
     </application>
 
 </manifest>

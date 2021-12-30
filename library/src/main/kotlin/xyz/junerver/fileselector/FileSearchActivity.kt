@@ -23,7 +23,7 @@ import java.util.ArrayList
 //置信度
 const val CONFIDENCE_LEVEL = 0.05
 const val EXTRA_IS_SELECTOR_MODE = "isSelectorMode"
-class FileSearchActivity : AppCompatActivity() {
+open class FileSearchActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
@@ -31,7 +31,7 @@ class FileSearchActivity : AppCompatActivity() {
 
     //用于显示搜索结果
     private val mResult = ArrayList<FileModel>()
-    private lateinit var mFileAdapter: FileAdapter
+    protected open lateinit var mFileAdapter: FileAdapter
     private val mSelectedFileList = ArrayList<FileModel>()
     private val ro = RatcliffObershelp()
     var mSearchItem: MenuItem? = null
@@ -48,6 +48,10 @@ class FileSearchActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycleView)
         empty = findViewById(R.id.empty)
 
+        initAdapter()
+    }
+
+    protected open fun initAdapter() {
         mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mResult,intent.getBooleanExtra(EXTRA_IS_SELECTOR_MODE, true))
         mFileAdapter.setSelectedFileList(mSelectedFileList)
         mFileAdapter.setMaxSelect(intent.getIntExtra("remainder", 0))

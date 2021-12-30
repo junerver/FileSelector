@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#339966"
-    tools:context="xyz.junerver.fileselectordemo.SplashActivity">
+    tools:context="xyz.junerver.fsbrowser.SplashActivity">
 
     <ImageView
         android:id="@+id/iv_icon"

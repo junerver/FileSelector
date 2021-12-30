@@ -18,10 +18,19 @@ import java.util.*
 open class FileAdapter(context: Context?, layoutId: Int, private val modelList: List<FileModel>,private val isSelectorMode:Boolean = false) :
     CommonAdapter<FileModel>(context, layoutId, modelList), SectionedAdapter {
 
+    //最大选择数量
     private var mMaxSelect = FileSelector.maxCount
 
+    //主UI的右上角menu
     private var mCountMenuItem: MenuItem? = null
+    //选择的文件
     private var mSelectedFileList: ArrayList<FileModel>? = null
+
+    private var openItemListener: (path: String) -> Unit = {  }
+
+    fun setListener(listener: (path: String) -> Unit) {
+        openItemListener = listener
+    }
 
     fun setMaxSelect(max: Int) {
         mMaxSelect = max
@@ -105,27 +114,33 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
         }
         val layout = holder.getView<RelativeLayout>(R.id.layout_item)
         layout.setOnClickListener {
-            if (fileModel.isSelected) {
-                mSelectedFileList?.remove(fileModel)
-                fileModel.isSelected = false
-            } else {
-                if (mSelectedFileList!!.size >= mMaxSelect) {
-                    Toast.makeText(
-                        mContext,
-                        "您最多只能选择" + FileSelector.maxCount.toString() + "个",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
+            if (isSelectorMode) {
+                if (fileModel.isSelected) {
+                    mSelectedFileList?.remove(fileModel)
+                    fileModel.isSelected = false
+                } else {
+                    if (mSelectedFileList!!.size >= mMaxSelect) {
+                        Toast.makeText(
+                            mContext,
+                            "您最多只能选择" + FileSelector.maxCount.toString() + "个",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    mSelectedFileList!!.add(fileModel)
+                    fileModel.isSelected = true
                 }
-                mSelectedFileList!!.add(fileModel)
-                fileModel.isSelected = true
+                checkBox.setChecked(fileModel.isSelected, true)
+                mCountMenuItem?.title = String.format(
+                    mContext.getString(R.string.selected_file_count),
+                    mSelectedFileList!!.size.toString(),
+                    java.lang.String.valueOf(FileSelector.maxCount)
+                )
+            } else {
+                //打开
+                openItemListener(fileModel.path)
             }
-            checkBox.setChecked(fileModel.isSelected, true)
-            mCountMenuItem?.title = String.format(
-                mContext.getString(R.string.selected_file_count),
-                mSelectedFileList!!.size.toString(),
-                java.lang.String.valueOf(FileSelector.maxCount)
-            )
+
         }
     }
 
