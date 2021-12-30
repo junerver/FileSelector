@@ -1,13 +1,19 @@
 package xyz.junerver.fileselector
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,8 +30,16 @@ import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.util.*
+import androidx.core.app.ActivityCompat.startActivityForResult
+
 
 const val RESULT_KEY = "extra_result"
+
+//请求管理全部文件
+const val REQUEST_CODE_MANAGE_APP_ALL_FILES = 998
+
+//请求查找文件
+const val REQUEST_CODE_SEARCH_FILES = 998
 
 class FileSelectorActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
@@ -41,11 +55,13 @@ class FileSelectorActivity : AppCompatActivity() {
 
     //用户当前选择的排序方式
     private var mCurrentSortType = FileSelector.mSortType
+    private lateinit var mContext: Context
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_selector)
+        mContext = this
         recyclerView = findViewById(R.id.recycleView)
         progressBar = findViewById(R.id.progressBar)
         val mToolBar = findViewById<Toolbar>(R.id.toolbar)
@@ -66,7 +82,26 @@ class FileSelectorActivity : AppCompatActivity() {
                 override fun passPermission() {
                     progressBar.visible()
                     initAdapter()
-                    getFiles()
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+                        //已有文件管理权限
+                        getFiles()
+                    } else {
+                        //没有文件管理权限去申请
+                        AlertDialog.Builder(mContext)
+                            .setTitle("提示：")
+                            .setMessage("请授予应用文件访问权限，否则会导致部分文件无法显示！")
+                            .setNeutralButton("取消") { _, _ -> getFiles() }
+                            .setPositiveButton("去授权") { _, _ ->
+                                val intent =
+                                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                                intent.data = Uri.parse("package:" + mContext.packageName)
+                                startActivityForResult(intent, REQUEST_CODE_MANAGE_APP_ALL_FILES)
+                            }
+                            .show()
+                    }
+
+
                 }
 
                 override fun continuePermission() {
@@ -131,7 +166,7 @@ class FileSelectorActivity : AppCompatActivity() {
                     list.sortByDescending { it.name }
                 }
                 BY_TIME_ASC -> {
-                   list.sortBy { it.date }
+                    list.sortBy { it.date }
                 }
                 BY_TIME_DESC -> {
                     list.sortByDescending { it.date }
@@ -207,20 +242,27 @@ class FileSelectorActivity : AppCompatActivity() {
             val i = Intent(this, FileSearchActivity::class.java)
             //还能选多少
             i.putExtra("remainder", FileSelector.maxCount - mSelectedFileList.size)
-            startActivityForResult(i,999)
+            startActivityForResult(i, REQUEST_CODE_SEARCH_FILES)
         }
         return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 999) {
+        if (requestCode == REQUEST_CODE_SEARCH_FILES) {
             mSelectedFileList.clear()
             mSelectedFileList.addAll(mFileModels.filter { it.isSelected })
             mFileAdapter.notifyDataSetChanged()
             updateMenuUI()
         }
+        if (requestCode == REQUEST_CODE_MANAGE_APP_ALL_FILES && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                toast("文件访问权限获取失败，部分文件可能无法展示！")
+            }
+            getFiles()
+        }
     }
+
 
     override fun onBackPressed() {
         super.onBackPressed()

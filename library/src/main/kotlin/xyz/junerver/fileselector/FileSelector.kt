@@ -40,7 +40,7 @@ class FileSelector private constructor(ctx: Context) {
     }
 
     fun isShowHiddenFile(show: Boolean): FileSelector {
-        isShow = show
+        isShowHidden = show
         return this
     }
 
@@ -114,7 +114,7 @@ class FileSelector private constructor(ctx: Context) {
         internal var mSortType = BY_TIME_DESC
         internal var maxCount = 9
         internal var barColor = Color.parseColor("#1bbc9b")
-        internal var isShow = false
+        internal var isShowHidden = false
         internal var selectPaths: Array<String> = arrayOf()
         internal var ignorePaths: Array<String> = arrayOf()
         private var instance: FileSelector? = null

@@ -58,14 +58,14 @@ object FilesScanWorker {
         val absPath = currentDir.absolutePath
         val files = currentDir.listFiles { file ->
             if (file.isDirectory) {
-                !(!FileSelector.isShow && file.isHidden)
+                !(!FileSelector.isShowHidden && file.isHidden)
             } else {
                 if (FileSelector.mFileTypes.isNotEmpty()) {
                     FileSelector.mFileTypes.find {
                         it.lowercase() == getExtensionByName(file.name).lowercase()
                     } != null
                 } else {
-                    !(!FileSelector.isShow && file.isHidden)
+                    !(!FileSelector.isShowHidden && file.isHidden)
                 }
             }
         }
