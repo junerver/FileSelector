@@ -9,6 +9,13 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/browser_sort"
+        android:icon="@drawable/ic_sort"
+        android:orderInCategory="100"
+        android:title="搜索"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/search_file"
         android:icon="@drawable/ic_search"
         android:orderInCategory="100"

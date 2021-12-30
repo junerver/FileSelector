@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,7 +47,9 @@ open class FileSelectorActivity : AppCompatActivity() {
 
     private val mFileModels = ArrayList<FileModel>()
     private val mSelectedFileList = ArrayList<FileModel>()
+    //显示选择数量的menu
     private var mCountMenuItem: MenuItem? = null
+    private var mSortMenuItem: MenuItem? = null
 
     //用户选择的排序方式索引
     private var mSelectSortTypeIndex = 0
@@ -210,11 +213,13 @@ open class FileSelectorActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.selector_menu, menu)
         mCountMenuItem = menu.findItem(R.id.select_count)
+        mSortMenuItem = menu.findItem(R.id.browser_sort)
         if (this::mFileAdapter.isInitialized) {
             "adapter init complete".log()
             mFileAdapter.setCountMenuItem(mCountMenuItem)
         }
         mCountMenuItem?.isVisible = isSelectorMode
+        mSortMenuItem?.isVisible = !isSelectorMode
         updateMenuUI()
         return true
     }
@@ -249,6 +254,58 @@ open class FileSelectorActivity : AppCompatActivity() {
             finish()
         } else if (i == R.id.search_file) {
             openSearchUI()
+        }else if (i == R.id.browser_sort) {
+            AlertDialog.Builder(this)
+                .setSingleChoiceItems(
+                    R.array.sort_list,
+                    mSelectSortTypeIndex
+                ) { _, which -> mSelectSortTypeIndex = which }
+                .setNegativeButton("降序") { _, _ ->
+                    Thread {
+                        runOnUiThread {
+                            progressBar.visible()
+                            recyclerView.gone()
+                        }
+                        sortFileList(
+                            when (mSelectSortTypeIndex) {
+                                0 -> BY_NAME_DESC
+                                1 -> BY_TIME_DESC
+                                2 -> BY_SIZE_DESC
+                                3 -> BY_EXTENSION_DESC
+                                else -> -1
+                            }, mFileModels
+                        )
+                        runOnUiThread {
+                            mFileAdapter.notifyDataSetChanged()
+                            progressBar.gone()
+                            recyclerView.visible()
+                        }
+                    }.start()
+                }
+                .setPositiveButton("升序") { _, _ ->
+                    Thread {
+                        runOnUiThread {
+                            progressBar.visible()
+                            recyclerView.gone()
+                        }
+                        sortFileList(
+                            when (mSelectSortTypeIndex) {
+                                0 -> BY_NAME_ASC
+                                1 -> BY_TIME_ASC
+                                2 -> BY_SIZE_ASC
+                                3 -> BY_EXTENSION_ASC
+                                else -> -1
+                            }, mFileModels
+                        )
+                        runOnUiThread {
+                            mFileAdapter.notifyDataSetChanged()
+                            progressBar.gone()
+                            recyclerView.visible()
+                        }
+                    }.start()
+                }
+                .setTitle("请选择")
+                .show()
         }
         return true
     }
