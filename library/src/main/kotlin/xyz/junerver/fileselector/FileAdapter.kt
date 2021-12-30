@@ -28,7 +28,7 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
 
     interface BrowserItemListener{
         fun onItemClick(path: String)
-        fun onItemLongClick(path: String)
+        fun onItemLongClick(path: String,fileModel: FileModel)
     }
 
     private var openItemListener: BrowserItemListener ?= null
@@ -149,7 +149,7 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
         }
         layout.setOnLongClickListener{
             if (!isSelectorMode) {
-                openItemListener?.onItemLongClick(fileModel.path)
+                openItemListener?.onItemLongClick(fileModel.path,fileModel)
             }
             true
         }

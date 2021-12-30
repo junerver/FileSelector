@@ -6,7 +6,7 @@ android {
     compileSdkVersion project.ext.compileSdkVersion
     buildToolsVersion project.ext.buildToolsVersion
     defaultConfig {
-        applicationId "xyz.junerver.fsbrowser"
+        applicationId "xyz.junerver.sfbrowser"
         minSdkVersion project.ext.minSdkVersion
         targetSdkVersion project.ext.targetSdkVersion
         versionCode project.ext.versionCode
@@ -43,7 +43,11 @@ dependencies {
 
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.1'
 
-    implementation 'com.drakeet.multitype:multitype:4.3.0'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //https://github.com/li-xiaojun/XPopup
+    implementation('com.github.li-xiaojun:XPopup:2.7.2'){
+        exclude group: 'com.github.bumptech.glide', module: 'glide'
+    }
 
 }

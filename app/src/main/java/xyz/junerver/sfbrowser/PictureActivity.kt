@@ -1,4 +1,4 @@
-package xyz.junerver.fsbrowser
+package xyz.junerver.sfbrowser
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import java.io.File
+import java.util.regex.Pattern
 
 
 fun AppCompatActivity.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -190,4 +191,9 @@ fun Context.shareFile(file:String){
     } catch (e: ActivityNotFoundException) {
         Toast.makeText(this, "sorry附件不能打开，请下载相关软件！", Toast.LENGTH_SHORT).show()
     }
+}
+
+fun String.isValidFileName(): Boolean {
+    val regex = "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
+    return Pattern.matches(regex,this)
 }

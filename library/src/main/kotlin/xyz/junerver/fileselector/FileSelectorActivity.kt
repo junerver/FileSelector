@@ -1,6 +1,7 @@
 package xyz.junerver.fileselector
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -62,6 +63,7 @@ open class FileSelectorActivity : AppCompatActivity() {
     protected open lateinit var mContext: Context
 
 
+    @SuppressLint("MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_selector)
@@ -171,6 +173,21 @@ open class FileSelectorActivity : AppCompatActivity() {
                     "scan completed，total：${fileModels.size}  All time consumed: ${end - start}ms ".log()
                 }
             }).work()
+    }
+
+    protected fun delItem(fileModel: FileModel) {
+        val index = mFileModels.indexOf(fileModel)
+        if (index != -1) {
+            mFileModels.remove(fileModel)
+            mFileAdapter.notifyItemRemoved(index)
+        }
+    }
+
+    protected fun changeItem(fileModel: FileModel) {
+        val index = mFileModels.indexOf(fileModel)
+        if (index != -1) {
+            mFileAdapter.notifyItemChanged(index)
+        }
     }
 
     private fun sortFileList(sortType: Int, list: ArrayList<FileModel>) {

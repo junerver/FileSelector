@@ -2,16 +2,9 @@ package xyz.junerver.fileselector
 
 
 import java.io.File
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import android.widget.Toast
-
-import android.content.ActivityNotFoundException
-import android.content.Context
-
-import android.content.Intent
-import android.net.Uri
-import java.text.DecimalFormat
 
 
 /**
@@ -20,7 +13,7 @@ import java.text.DecimalFormat
  * @author Lee
  */
 
-internal fun getDateTime(millis: Long): String {
+fun getDateTime(millis: Long): String {
     val cal = Calendar.getInstance()
     cal.timeInMillis = millis
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.PRC)

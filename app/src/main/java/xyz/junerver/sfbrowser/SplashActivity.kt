@@ -1,4 +1,4 @@
-package xyz.junerver.fsbrowser
+package xyz.junerver.sfbrowser
 
 import android.Manifest
 import android.content.Intent

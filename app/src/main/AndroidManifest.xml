@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="xyz.junerver.fsbrowser">
+    package="xyz.junerver.sfbrowser">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,16 +14,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="xyz.junerver.fsbrowser.PictureActivity"
+            android:name=".PictureActivity"
             android:exported="false" />
         <activity
-            android:name="xyz.junerver.fsbrowser.MainActivity"
+            android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name="xyz.junerver.fsbrowser.OpenSearchActivity"
+            android:name=".OpenSearchActivity"
             android:exported="false" />
         <activity
-            android:name="xyz.junerver.fsbrowser.SplashActivity"
+            android:name=".SplashActivity"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize"
             android:exported="true">
             <intent-filter>
@@ -40,7 +40,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
+                android:resource="@xml/filepaths" />
         </provider>
     </application>
 

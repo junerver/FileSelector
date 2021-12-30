@@ -1,4 +1,4 @@
-package xyz.junerver.fsbrowser
+package xyz.junerver.sfbrowser
 
 import android.content.Intent
 import xyz.junerver.fileselector.*
@@ -26,7 +26,7 @@ class OpenSearchActivity : FileSearchActivity() {
                 }
             }
 
-            override fun onItemLongClick(path: String) {
+            override fun onItemLongClick(path: String,fileModel: FileModel) {
                 TODO("Not yet implemented")
             }
         })
