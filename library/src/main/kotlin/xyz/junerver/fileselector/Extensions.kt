@@ -148,12 +148,25 @@ class TextChangedListenerDsl : TextWatcher {
 fun Context.showManagerFileTips(cancel: () -> Unit = {}, request: (intent: Intent) -> Unit = {}) {
     AlertDialog.Builder(this)
         .setTitle("提示：")
+        .setCancelable(false)
         .setMessage("请授予应用文件访问权限，否则会导致部分文件无法显示！")
         .setNeutralButton("取消") { _, _ -> cancel.invoke() }
         .setPositiveButton("去授权") { _, _ ->
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             intent.data = Uri.parse("package:" + this.packageName)
             request(intent)
+        }
+        .show()
+}
+
+fun Context.showRequestDataTips(cancel: () -> Unit = {}, request: () -> Unit = {}) {
+    AlertDialog.Builder(this)
+        .setTitle("提示：")
+        .setCancelable(false)
+        .setMessage("请在下一个页面授予应用data目录访问权限，否则会导致部分文件无法显示！")
+        .setNeutralButton("取消") { _, _ -> cancel.invoke() }
+        .setPositiveButton("去授权") { _, _ ->
+            request.invoke()
         }
         .show()
 }

@@ -163,7 +163,7 @@ class FileSelector private constructor(ctx: Context) {
         )
         internal var ignorePaths: Array<String> = arrayOf()
         private var instance: FileSelector? = null
-        internal var isDebugLog =true
+        internal var isDebugLog = false
 
         fun getInstance(context: Context): FileSelector {
             "++++++++++++++++++ Versin: $VERSION ++++++++++++++++++++++".log()
