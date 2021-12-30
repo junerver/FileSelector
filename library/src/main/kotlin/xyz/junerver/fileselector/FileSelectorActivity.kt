@@ -82,26 +82,21 @@ class FileSelectorActivity : AppCompatActivity() {
                 override fun passPermission() {
                     progressBar.visible()
                     initAdapter()
-
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
                         //已有文件管理权限
                         getFiles()
                     } else {
                         //没有文件管理权限去申请
-                        AlertDialog.Builder(mContext)
-                            .setTitle("提示：")
-                            .setMessage("请授予应用文件访问权限，否则会导致部分文件无法显示！")
-                            .setNeutralButton("取消") { _, _ -> getFiles() }
-                            .setPositiveButton("去授权") { _, _ ->
-                                val intent =
-                                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                                intent.data = Uri.parse("package:" + mContext.packageName)
-                                startActivityForResult(intent, REQUEST_CODE_MANAGE_APP_ALL_FILES)
+                        showManagerFileTips(
+                            cancel = { getFiles() },
+                            request = {
+                                startActivityForResult(
+                                    intent,
+                                    REQUEST_CODE_MANAGE_APP_ALL_FILES
+                                )
                             }
-                            .show()
+                        )
                     }
-
-
                 }
 
                 override fun continuePermission() {

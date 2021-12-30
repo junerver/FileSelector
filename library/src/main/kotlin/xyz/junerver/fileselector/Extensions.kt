@@ -1,14 +1,19 @@
 package xyz.junerver.fileselector
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
@@ -135,3 +140,15 @@ class TextChangedListenerDsl : TextWatcher {
 }
 //endregion
 
+fun Context.showManagerFileTips(cancel: () -> Unit = {}, request: (intent: Intent) -> Unit = {}) {
+    AlertDialog.Builder(this)
+        .setTitle("提示：")
+        .setMessage("请授予应用文件访问权限，否则会导致部分文件无法显示！")
+        .setNeutralButton("取消") { _, _ -> cancel.invoke() }
+        .setPositiveButton("去授权") { _, _ ->
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            intent.data = Uri.parse("package:" + this.packageName)
+            request(intent)
+        }
+        .show()
+}

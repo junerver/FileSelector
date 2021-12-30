@@ -2,6 +2,8 @@ package xyz.junerver.fileselector
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
+import android.os.Environment
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -92,6 +94,28 @@ class FileSelector private constructor(ctx: Context) {
     fun setDebug(debug: Boolean): FileSelector {
         isDebugLog = debug
         return this
+    }
+
+    /**
+    * Description: 主动请求权限，需要在resume中处理判断是否授权
+    * @author Junerver
+    * @date: 2021/12/30-9:09
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
+    fun requestManagerFiles() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+            //没有文件管理权限去申请
+            mSrCtx.get()?.apply {
+                showManagerFileTips(
+                    request = {
+                        startActivity(it)
+                    }
+                )
+            }
+        }
     }
 
     /**
