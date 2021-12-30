@@ -23,4 +23,17 @@
     <external-media-path
         name="external_media_path"
         path="." />
+    <external-files-path
+        name="umeng_cache"
+        path="umeng_cache/" />
+    <!-- QQ 官方分享SDK 共享路径 -->
+    <root-path
+        name="opensdk_root"
+        path="" />
+    <external-files-path
+        name="opensdk_external"
+        path="Images/tmp" />
+    <root-path
+        name="opensdk_root"
+        path="" />
 </paths>
