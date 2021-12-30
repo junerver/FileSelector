@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
 
 android {
     compileSdkVersion project.ext.compileSdkVersion
@@ -40,4 +42,8 @@ dependencies {
     implementation 'com.github.shichuanenhui:baseadapter:2.0.0'
 
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.1'
+
+    implementation 'com.drakeet.multitype:multitype:4.3.0'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
 }

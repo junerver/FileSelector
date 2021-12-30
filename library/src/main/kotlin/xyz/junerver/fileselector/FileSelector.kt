@@ -25,13 +25,6 @@ class FileSelector private constructor(ctx: Context) {
     //使用软引用持有ctx对象以避免内存泄漏
     private val mSrCtx: SoftReference<Context> = SoftReference(ctx)
 
-    init {
-        selectPaths = arrayOf(
-            "/storage/emulated/0/DCIM",
-            "/storage/emulated/0/Android/data/" + mSrCtx.get()?.packageName + "/"
-        )
-    }
-
     fun setSelectPath(vararg selects: String): FileSelector {
         selectPaths = selects as Array<String>
         if (!selectPaths.isNullOrEmpty()) {
@@ -158,10 +151,13 @@ class FileSelector private constructor(ctx: Context) {
         internal var maxCount = 9
         internal var barColor = Color.parseColor("#1bbc9b")
         internal var isShowHidden = false
-        internal var selectPaths: Array<String> = arrayOf()
+        internal var selectPaths: Array<String> =arrayOf(
+            "/storage/emulated/0/",
+            "/storage/emulated/0/Android/data/"
+        )
         internal var ignorePaths: Array<String> = arrayOf()
         private var instance: FileSelector? = null
-        internal var isDebugLog = false
+        internal var isDebugLog =true
 
         fun getInstance(context: Context): FileSelector {
             "++++++++++++++++++ Versin: $VERSION ++++++++++++++++++++++".log()

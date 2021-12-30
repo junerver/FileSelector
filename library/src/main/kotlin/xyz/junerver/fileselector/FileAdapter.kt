@@ -1,9 +1,7 @@
 package xyz.junerver.fileselector
 
 import android.content.Context
-import android.util.Log
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -17,7 +15,7 @@ import java.util.*
 /**
  * @author Lee
  */
-internal class FileAdapter(context: Context?, layoutId: Int, private val modelList: List<FileModel>) :
+open class FileAdapter(context: Context?, layoutId: Int, private val modelList: List<FileModel>,private val isSelectorMode:Boolean = false) :
     CommonAdapter<FileModel>(context, layoutId, modelList), SectionedAdapter {
 
     private var mMaxSelect = FileSelector.maxCount
@@ -66,39 +64,46 @@ internal class FileAdapter(context: Context?, layoutId: Int, private val modelLi
             val s = AvatarUtils.generateDefaultAvatar(mContext, extension)
             Glide.with(mContext).load(s).into(imageView)
         }
+        holder.apply {
+           setText(R.id.tv_name, fileModel.name)
+           setText(R.id.tv_detail, getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size))
+        }
+        //勾选框配置
         val checkBox = holder.getView<SmoothCheckBox>(R.id.checkbox)
-        val layout = holder.getView<RelativeLayout>(R.id.layout_item)
-        holder.setText(R.id.tv_name, fileModel.name)
-        holder.setText(
-            R.id.tv_detail,
-            getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size)
-        )
-        checkBox.setOnCheckedChangeListener(null)
-        checkBox.setChecked(fileModel.isSelected, false)
-        checkBox.setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { cb, isChecked ->
-            if (!isChecked && fileModel.isSelected) {
-                mSelectedFileList?.remove(fileModel)
-                fileModel.isSelected = false
-            } else if (isChecked && !fileModel.isSelected) {
-                if (mSelectedFileList!!.size >= mMaxSelect) {
-                    Toast.makeText(
-                        mContext,
-                        "您最多只能选择" + FileSelector.maxCount.toString() + "个",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    cb.setChecked(false, true)
-                    return@OnCheckedChangeListener
+        checkBox.apply {
+            setOnCheckedChangeListener(null)
+            setChecked(fileModel.isSelected, false)
+            setOnCheckedChangeListener(SmoothCheckBox.OnCheckedChangeListener { cb, isChecked ->
+                if (!isChecked && fileModel.isSelected) {
+                    mSelectedFileList?.remove(fileModel)
+                    fileModel.isSelected = false
+                } else if (isChecked && !fileModel.isSelected) {
+                    if (mSelectedFileList!!.size >= mMaxSelect) {
+                        Toast.makeText(
+                            mContext,
+                            "您最多只能选择" + FileSelector.maxCount.toString() + "个",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        cb.setChecked(false, true)
+                        return@OnCheckedChangeListener
+                    }
+                    "onCheckedChanged: ${fileModel.name}".log()
+                    mSelectedFileList!!.add(fileModel)
+                    fileModel.isSelected = true
                 }
-                "onCheckedChanged: ${fileModel.name}".log()
-                mSelectedFileList!!.add(fileModel)
-                fileModel.isSelected = true
+                mCountMenuItem?.title = String.format(
+                    mContext.getString(R.string.selected_file_count),
+                    mSelectedFileList!!.size.toString(),
+                    java.lang.String.valueOf(FileSelector.maxCount)
+                )
+            })
+           if (isSelectorMode) {
+                visible()
+            } else {
+                gone()
             }
-            mCountMenuItem?.title = String.format(
-                mContext.getString(R.string.selected_file_count),
-                mSelectedFileList!!.size.toString(),
-                java.lang.String.valueOf(FileSelector.maxCount)
-            )
-        })
+        }
+        val layout = holder.getView<RelativeLayout>(R.id.layout_item)
         layout.setOnClickListener {
             if (fileModel.isSelected) {
                 mSelectedFileList?.remove(fileModel)

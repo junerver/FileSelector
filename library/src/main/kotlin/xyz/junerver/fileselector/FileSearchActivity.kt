@@ -22,7 +22,7 @@ import java.util.ArrayList
 
 //置信度
 const val CONFIDENCE_LEVEL = 0.05
-
+const val EXTRA_IS_SELECTOR_MODE = "isSelectorMode"
 class FileSearchActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: FastScrollRecyclerView
@@ -48,7 +48,7 @@ class FileSearchActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycleView)
         empty = findViewById(R.id.empty)
 
-        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mResult)
+        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mResult,intent.getBooleanExtra(EXTRA_IS_SELECTOR_MODE, true))
         mFileAdapter.setSelectedFileList(mSelectedFileList)
         mFileAdapter.setMaxSelect(intent.getIntExtra("remainder", 0))
         recyclerView.layoutManager = LinearLayoutManager(this)

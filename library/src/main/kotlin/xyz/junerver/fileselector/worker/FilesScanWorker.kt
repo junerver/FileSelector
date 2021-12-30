@@ -31,9 +31,12 @@ object FilesScanWorker {
 
     private fun getFiles(): List<FileModel?> {
         if (FileSelector.selectPaths.isNotEmpty()) {
+            "需要遍历的文件：${FileSelector.selectPaths.joinToString()}".log()
             for (selectPath in FileSelector.selectPaths) {
                 GlobalThreadPools.getInstance().execute { getFolderFiles(selectPath) }
             }
+        } else {
+            "选择目录为空！".log()
         }
         try {
             Thread.sleep(100)

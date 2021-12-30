@@ -3,17 +3,14 @@ package xyz.junerver.fileselector
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +27,6 @@ import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.util.*
-import androidx.core.app.ActivityCompat.startActivityForResult
 
 
 const val RESULT_KEY = "extra_result"
@@ -41,17 +37,21 @@ const val REQUEST_CODE_MANAGE_APP_ALL_FILES = 998
 //请求查找文件
 const val REQUEST_CODE_SEARCH_FILES = 998
 
-class FileSelectorActivity : AppCompatActivity() {
+open class FileSelectorActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
+    protected open lateinit var mToolBar:Toolbar
+
     private val mFileModels = ArrayList<FileModel>()
     private val mSelectedFileList = ArrayList<FileModel>()
     private var mCountMenuItem: MenuItem? = null
 
     //用户选择的排序方式索引
     private var mSelectSortTypeIndex = 0
-    private lateinit var mFileAdapter: FileAdapter
+    protected lateinit var mFileAdapter: FileAdapter
+    //是否为选择器模式
+    protected open var isSelectorMode = true
 
     //用户当前选择的排序方式
     private var mCurrentSortType = FileSelector.mSortType
@@ -64,15 +64,8 @@ class FileSelectorActivity : AppCompatActivity() {
         mContext = this
         recyclerView = findViewById(R.id.recycleView)
         progressBar = findViewById(R.id.progressBar)
-        val mToolBar = findViewById<Toolbar>(R.id.toolbar)
         empty = findViewById(R.id.empty)
-        window.statusBarColor = FileSelector.barColor
-        mToolBar.setBackgroundColor(FileSelector.barColor)
-        setSupportActionBar(mToolBar)
-        supportActionBar?.title = "文件选择"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeButtonEnabled(true)
-        mToolBar.setNavigationOnClickListener { onBackPressed() }
+        initToolBar()
         val permissions = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -91,7 +84,7 @@ class FileSelectorActivity : AppCompatActivity() {
                             cancel = { getFiles() },
                             request = {
                                 startActivityForResult(
-                                    intent,
+                                    it,
                                     REQUEST_CODE_MANAGE_APP_ALL_FILES
                                 )
                             }
@@ -107,6 +100,27 @@ class FileSelectorActivity : AppCompatActivity() {
                     Toast.makeText(this@FileSelectorActivity, "读写权限被拒绝", Toast.LENGTH_LONG).show()
                 }
             })
+    }
+
+    protected open fun initToolBar(title: String = "文件选择") {
+        mToolBar = findViewById<Toolbar>(R.id.toolbar)
+        window.statusBarColor = FileSelector.barColor
+        mToolBar.setBackgroundColor(FileSelector.barColor)
+        setSupportActionBar(mToolBar)
+        supportActionBar?.title = title
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+        mToolBar.setNavigationOnClickListener { onBackPressed() }
+    }
+
+    private fun initAdapter() {
+        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mFileModels,isSelectorMode)
+        mFileAdapter.setSelectedFileList(mSelectedFileList)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = mFileAdapter
+        if (mCountMenuItem != null) {
+            mFileAdapter.setCountMenuItem(mCountMenuItem)
+        }
     }
 
     private fun getFiles() {
@@ -184,16 +198,6 @@ class FileSelectorActivity : AppCompatActivity() {
         }
     }
 
-    private fun initAdapter() {
-        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mFileModels)
-        mFileAdapter.setSelectedFileList(mSelectedFileList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = mFileAdapter
-        if (mCountMenuItem != null) {
-            mFileAdapter.setCountMenuItem(mCountMenuItem)
-        }
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.selector_menu, menu)
         mCountMenuItem = menu.findItem(R.id.select_count)
@@ -201,6 +205,7 @@ class FileSelectorActivity : AppCompatActivity() {
             "adapter init complete".log()
             mFileAdapter.setCountMenuItem(mCountMenuItem)
         }
+        mCountMenuItem?.isVisible = isSelectorMode
         updateMenuUI()
         return true
     }
@@ -228,7 +233,7 @@ class FileSelectorActivity : AppCompatActivity() {
             }
             //不为空
             if (ActivityUIWorker.listener != null) {
-                ActivityUIWorker.listener!!.onResult(
+                ActivityUIWorker.listener?.onResult(
                     mSelectedFileList
                 )
             }
@@ -237,6 +242,7 @@ class FileSelectorActivity : AppCompatActivity() {
             val i = Intent(this, FileSearchActivity::class.java)
             //还能选多少
             i.putExtra("remainder", FileSelector.maxCount - mSelectedFileList.size)
+            i.putExtra(EXTRA_IS_SELECTOR_MODE, isSelectorMode)
             startActivityForResult(i, REQUEST_CODE_SEARCH_FILES)
         }
         return true
