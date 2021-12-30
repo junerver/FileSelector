@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
 
-fun AppCompatActivity.toast(msg: String) = Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
+fun AppCompatActivity.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
 fun View.gone() {
     this.visibility = View.GONE
@@ -45,7 +45,11 @@ fun visibles(vararg views: View) {
     }
 }
 
-fun String.log() = Log.d("FileSelector", this)
+fun String.log() {
+    if (FileSelector.isDebugLog) {
+        Log.d("FileSelector", this)
+    }
+}
 
 fun <T> T.postUI(action: () -> Unit) {
 
@@ -79,8 +83,8 @@ fun <T> T.postUI(action: () -> Unit) {
     KitUtil.handler.post { action() }
 }
 
-object KitUtil{
-    val handler: Handler by lazy {  Handler(Looper.getMainLooper()) }
+object KitUtil {
+    val handler: Handler by lazy { Handler(Looper.getMainLooper()) }
 }
 
 //region DSL实现的监听器

@@ -17,7 +17,8 @@ import java.lang.ref.SoftReference
  * Version: v1.0
  */
 
-const val VERSION = "0.0.13"
+const val VERSION = "0.0.15"
+
 class FileSelector private constructor(ctx: Context) {
     //使用软引用持有ctx对象以避免内存泄漏
     private val mSrCtx: SoftReference<Context> = SoftReference(ctx)
@@ -31,11 +32,24 @@ class FileSelector private constructor(ctx: Context) {
 
     fun setSelectPath(vararg selects: String): FileSelector {
         selectPaths = selects as Array<String>
+        if (!selectPaths.isNullOrEmpty()) {
+            "~~~~~~~~~~~~~~~~~~~ 选择的文件目录 ~~~~~~~~~~~~~~~~~~~".log()
+            selectPaths.forEach {
+                it.log()
+            }
+        }
         return this
     }
 
     fun setIgnorePath(vararg paths: String): FileSelector {
         ignorePaths = paths as Array<String>
+        if (!ignorePaths.isNullOrEmpty()) {
+            "~~~~~~~~~~~~~~~~~~~ 忽略的文件目录 ~~~~~~~~~~~~~~~~~~~".log()
+            ignorePaths.forEach {
+                it.log()
+            }
+        }
+
         return this
     }
 
@@ -72,6 +86,11 @@ class FileSelector private constructor(ctx: Context) {
 
     fun setSortType(sortType: Int): FileSelector {
         mSortType = sortType
+        return this
+    }
+
+    fun setDebug(debug: Boolean): FileSelector {
+        isDebugLog = debug
         return this
     }
 
@@ -118,6 +137,7 @@ class FileSelector private constructor(ctx: Context) {
         internal var selectPaths: Array<String> = arrayOf()
         internal var ignorePaths: Array<String> = arrayOf()
         private var instance: FileSelector? = null
+        internal var isDebugLog = false
 
         fun getInstance(context: Context): FileSelector {
             "++++++++++++++++++ Versin: $VERSION ++++++++++++++++++++++".log()
