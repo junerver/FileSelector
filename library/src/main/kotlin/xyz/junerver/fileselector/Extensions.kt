@@ -194,6 +194,18 @@ fun Context.openFile(file:String){
     }
 }
 
+fun Context.openUri(uri:String){
+    try {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.setDataAndType(Uri.parse(uri), MapTable.getMIMEType(uri))
+        this.startActivity(intent)
+        Intent.createChooser(intent, "请选择对应的软件打开该附件！")
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(this, "sorry附件不能打开，请下载相关软件！", Toast.LENGTH_SHORT).show()
+    }
+}
+
 fun Context.shareFile(file:String){
     try {
         val intent = Intent(Intent.ACTION_SEND)

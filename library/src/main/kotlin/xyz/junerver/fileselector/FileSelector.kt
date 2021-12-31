@@ -19,7 +19,7 @@ import java.lang.ref.SoftReference
  * Version: v1.0
  */
 
-const val VERSION = "0.1.1"
+const val VERSION = "0.1.15"
 
 class FileSelector private constructor(ctx: Context) {
     //使用软引用持有ctx对象以避免内存泄漏

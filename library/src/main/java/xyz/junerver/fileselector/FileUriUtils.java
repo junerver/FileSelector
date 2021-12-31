@@ -104,7 +104,6 @@ public class FileUriUtils {
             stringBuilder.append("%2F").append(p);
         }
         return stringBuilder.toString();
-
     }
 
 

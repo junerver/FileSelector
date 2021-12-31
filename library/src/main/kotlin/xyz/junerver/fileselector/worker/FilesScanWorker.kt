@@ -48,15 +48,6 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                         path = selectPath.substring(0, selectPath.lastIndex)
                         path.log()
                     }
-//                    val document:DocumentFile?=if (path.equals(ANDROID_DATA_PATH)) {
-//                        DocumentFile.fromTreeUri(
-//                            mSrCtx.get()!!,
-//                            Uri.parse(FileUriUtils.changeToUri3(path))
-//                            )
-//                    } else {
-//                        //错误的写法只能判断是否存在，不能拿到下面的文件
-//                        FileUriUtils.getDoucmentFile(mSrCtx.get()!!,path)
-//                    }
                     DocumentFile.fromTreeUri(
                         mSrCtx.get()!!,
                         Uri.parse(FileUriUtils.changeToUri3(path))
@@ -85,7 +76,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 onCompleted(list)
             }
         }
-        "Done paths: ${mFilesIndexMap.size}  files:${mFileModelSet.size}".log()
+        "Done paths: ${mFilesIndexMap.size}  files:${mFileModelSet.size}  data:${mDataCount}".log()
         return list
     }
 
@@ -162,20 +153,31 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
         }
     }
 
-
+    /**
+     * Description: 遍历data
+     * @author Junerver
+     * @date: 2021/12/30-17:20
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     private fun getDataFolderFiles(documentFile: DocumentFile) {
         if (documentFile.isDirectory) {
             "data: ${documentFile.uri}  ${documentFile.isDirectory} +${Thread.currentThread().name}".log()
             val fms: MutableList<FileModel> = ArrayList()
             for (file in documentFile.listFiles()) {
-                if (file.isFile) {
+                if (file.isFile && TARGET_DIR_PATH.contains(documentFile.uri.toString())) {
                     //文件
                     val isFileTypeNeed = FileSelector.mFileTypes.find {
                         it.lowercase() == getExtensionByName(file.name.toString()).lowercase()
                     } != null
                     if (isFileTypeNeed) {
                         val fileModel = FileModel(
-                            URLDecoder.decode(FileUriUtils.treeToPath(file.uri.toString()),"UTF-8"),
+                            URLDecoder.decode(
+                                FileUriUtils.treeToPath(file.uri.toString()),
+                                "UTF-8"
+                            ),
                             file.name.toString(),
                             getExtensionByName(file.name.toString()),
                             file.length(),
@@ -188,15 +190,14 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 } else {
                     //目录
                     val path = file.uri.toString()
-                    val inRange = INCLUDE_PACKAGE_NAME.find {
+                    //只遍历允许遍历的文件夹
+                    val isInclude = INCLUDE_PACKAGE_DIR_LEVEL.find {
                         path == it
                     } != null
-
-                    if (inRange) {
-                        INCLUDE_PACKAGE_NAME.remove(path)
+                    if (isInclude) {
+                        INCLUDE_PACKAGE_DIR_LEVEL.remove(path)
                         GlobalThreadPools.getInstance().execute { getDataFolderFiles(file) }
                     }
-
                 }
             }
             if (fms.isNotEmpty()) {
@@ -206,6 +207,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     mCallBack?.run {
                         postUI {
                             "data scanned：${fms.size} ".log()
+                            mDataCount += fms.size
                             onNext(fms)
                         }
                     }
@@ -222,15 +224,17 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
      * @return
      */
     fun work() {
+        mDataCount = 0
         mFileModelSet.clear()
         mFilesIndexMap.clear()
         Thread { getFiles() }.start()
     }
 
     companion object {
+        private var mDataCount = 0
         val mFileModelSet = CopyOnWriteArraySet<FileModel>()
         private val mFilesIndexMap = HashMap<String, List<FileModel>>()
-        val INCLUDE_PACKAGE_NAME = arrayListOf(
+        val INCLUDE_PACKAGE_DIR_LEVEL = arrayListOf(
             //QQ文件目录层级
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent/QQfile_recv"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent"),
@@ -243,6 +247,15 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files/ThunderDownload"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider"),
+        )
+
+        val TARGET_DIR_PATH = arrayListOf(
+            //QQ文件目录层级
+            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent/QQfile_recv"),
+            //微信目录层级
+            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg/Download"),
+            //迅雷目录层级
+            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files/ThunderDownload"),
         )
     }
 

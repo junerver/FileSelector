@@ -1,5 +1,6 @@
 package xyz.junerver.fileselector
 
+import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -38,6 +39,7 @@ open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack
     var mSearchView:SearchView?= null
     protected open lateinit var mContext: Context
 
+    @SuppressLint("MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file_search)
