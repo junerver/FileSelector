@@ -12,7 +12,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 
 import android.os.ParcelFileDescriptor
+import xyz.junerver.fileselector.FileUriUtils
 import xyz.junerver.fileselector.log
+import xyz.junerver.fileselector.worker.ANDROID_DATA_PATH
 import java.io.FileDescriptor
 import java.io.IOException
 
@@ -23,16 +25,28 @@ class PictureActivity : AppCompatActivity() {
         setContentView(R.layout.activity_picture)
         val photoView = findViewById<PhotoView>(R.id.photo_view)
         val p = intent.getParcelableExtra<FileModel>("path")
+        p.toString().log()
         p?.let {
+            if (it.path.startsWith(ANDROID_DATA_PATH)) {
+                it.isAndroidData = true
+                it.documentFile = FileUriUtils.getDoucmentFile(this,it.path)
+            }
             if (!it.isAndroidData) {
                 photoView.setImageURI(getUriForFile(File(it.path)))
             } else {
                 it.uri?.let { uri ->
-                    photoView.setImageBitmap(getBitmapFromUri(uri))
+                    photoView.setImageBitmap(getBitmap(uri))
                 }
             }
         }
 
+    }
+
+    private fun getBitmap(uri: Uri): Bitmap? {
+        val fis = this.contentResolver.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(fis)
+        fis?.close()
+        return bitmap
     }
 
     @Throws(IOException::class)
