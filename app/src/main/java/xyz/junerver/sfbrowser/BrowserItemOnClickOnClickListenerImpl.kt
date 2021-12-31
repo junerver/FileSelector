@@ -4,10 +4,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.lee.adapter.recyclerview.base.ViewHolder
 import com.lxj.xpopup.XPopup
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import xyz.junerver.fileselector.*
+import xyz.junerver.fileselector.R
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -23,23 +28,54 @@ import java.nio.file.Files
 class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileModelItemCallBack) :
     FileAdapter.BrowserItemOnClickListener {
 
-    override fun onItemClick(ctx: Context, fileModel: FileModel) {
+    override fun onItemClick(ctx: Context, holder: ViewHolder, fileModel: FileModel) {
         val ex = getExtension(fileModel.path).lowercase()
         if (FileSelector.IMAGE_TYPES.contains(ex)) {
             //图片格式
             val i = Intent(ctx, PictureActivity::class.java)
-            i.putExtra("path", fileModel.path)
+            i.putExtra("path", fileModel)
             ctx.startActivity(i)
         } else {
             if (!fileModel.isAndroidData) {
                 ctx.openFile(fileModel.path)
             } else {
-                ctx.toast("无法打开Android/data目录下的文件！请长按使用提取功能!")
+                ctx.toast("请稍等...")
+                val target = File(ROOT_DIR + fileModel.name)
+                GlobalThreadPools.getInstance().execute {
+                    fileModel.documentFile?.let { doc ->
+                        val fis = ctx.contentResolver.openInputStream(doc.uri)
+                        fis?.let { `is` ->
+                            val bis = BufferedInputStream(`is`)
+                            val fos = FileOutputStream(target)
+                            try {
+                                val buffer = ByteArray(1024)
+                                var len: Int
+                                var total = 0
+                                while (((bis.read(buffer)).also { len = it }) != -1) {
+                                    fos.write(buffer, 0, len)
+                                    total += len
+                                }
+                                Thread.sleep(100)
+                                postUI {
+                                    ctx.openFile(target.path)
+                                }
+                            } catch (e: Exception) {
+                                postUI {
+                                    ctx.toast("文件打开失败！")
+                                }
+                            } finally {
+                                fos.close()
+                                bis.close()
+                                `is`.close()
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    override fun onItemLongClick(ctx: Context, fileModel: FileModel) {
+    override fun onItemLongClick(ctx: Context, holder: ViewHolder,fileModel: FileModel) {
         XPopup.Builder(ctx)
             .asBottomList(
                 "", MENU_ITEMS
@@ -62,6 +98,11 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                             }
                         } else {
                             //
+                            val circularProgressBar = holder.getView<CircularProgressBar>(R.id.circularProgressBar)
+                            circularProgressBar.apply {
+                                progressMax = 100f
+                                visibility = View.VISIBLE
+                            }
                             GlobalThreadPools.getInstance().execute {
                                 fileModel.documentFile?.let { doc ->
                                     val fis = ctx.contentResolver.openInputStream(doc.uri)
@@ -72,15 +113,27 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                                             val buffer = ByteArray(1024)
                                             var len: Int
                                             var total = 0
+                                            var lastTime = System.currentTimeMillis()
                                             while (((bis.read(buffer)).also { len = it }) != -1) {
                                                 fos.write(buffer, 0, len)
                                                 total += len
                                                 //获取当前下载量
                                                 val progress: Double =
                                                     total.toDouble() / fileModel.size
-                                                "下载量： $progress".log()
+                                                val currentTime = System.currentTimeMillis()
+                                                if (currentTime - lastTime > 100) {
+                                                    //每100ms刷新一次UI
+                                                    postUI {
+                                                        circularProgressBar.setProgressWithAnimation(
+                                                            (progress * 100).toFloat(),
+                                                            100
+                                                        ) }
+                                                    lastTime = currentTime
+                                                }
                                             }
+                                            Thread.sleep(100)
                                             postUI {
+                                                circularProgressBar.gone()
                                                 ctx.toast("文件提取成功：${target.path}")
                                             }
                                         } catch (e: Exception) {

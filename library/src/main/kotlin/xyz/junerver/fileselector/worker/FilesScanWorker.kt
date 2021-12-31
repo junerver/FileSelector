@@ -183,7 +183,6 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                             file.length(),
                             file.lastModified()
                         )
-                        fileModel.isAndroidData = true
                         fileModel.documentFile = file
                         fms.add(fileModel)
                     }

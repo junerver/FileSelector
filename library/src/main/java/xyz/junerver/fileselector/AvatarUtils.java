@@ -44,7 +44,7 @@ public class AvatarUtils {
         }
         try {
             FileOutputStream out = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, out);
             out.flush();
             out.close();
         } catch (IOException e) {

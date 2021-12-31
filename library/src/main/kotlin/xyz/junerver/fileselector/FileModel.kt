@@ -1,27 +1,37 @@
 package xyz.junerver.fileselector
 
+import android.net.Uri
+import android.os.Parcelable
 import androidx.documentfile.provider.DocumentFile
+import kotlinx.parcelize.Parcelize
 import java.io.File
 
+@Parcelize
 data class FileModel(
     var path: String,
     var name: String,
     var extension: String,
     var size: Long,
     var date: Long,
-)  {
+) : Parcelable {
     //是不是data文件
     var isAndroidData = false
+    var uri: Uri? = null
     var documentFile: DocumentFile? = null
+        set(value) {
+            field = value
+            this.uri = value?.uri
+            this.isAndroidData = true
+        }
     var isSelected = false
-    var similarity:Double = 0.0
+    var similarity: Double = 0.0
 
     fun update(f: File) {
-        val pathStr = f.absolutePath
         this.path = f.absolutePath
         this.name = f.name
         this.date = f.lastModified()
     }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is FileModel) return false

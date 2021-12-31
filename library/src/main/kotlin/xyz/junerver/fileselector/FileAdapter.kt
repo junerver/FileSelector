@@ -10,6 +10,7 @@ import com.lee.adapter.recyclerview.CommonAdapter
 import com.lee.adapter.recyclerview.base.ViewHolder
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView.SectionedAdapter
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * @author Lee
@@ -25,6 +26,8 @@ open class FileAdapter(
     //最大选择数量
     private var mMaxSelect = FileSelector.maxCount
 
+    private val mFileTypeBitmapMap = HashMap<String,String>()
+
     //主UI的右上角menu
     private var mCountMenuItem: MenuItem? = null
 
@@ -32,8 +35,8 @@ open class FileAdapter(
     private var mSelectedFileList: ArrayList<FileModel>? = null
 
     interface BrowserItemOnClickListener {
-        fun onItemClick(ctx: Context, fileModel: FileModel)
-        fun onItemLongClick(ctx: Context, fileModel: FileModel)
+        fun onItemClick(ctx: Context, holder: ViewHolder, fileModel: FileModel)
+        fun onItemLongClick(ctx: Context, holder: ViewHolder, fileModel: FileModel)
     }
 
     private var mBrowserItemOnClickListener: BrowserItemOnClickListener? = null
@@ -78,9 +81,19 @@ open class FileAdapter(
             extension.equals("3gp", ignoreCase = true) ||
             extension.equals("mov", ignoreCase = true)
         ) {
-            Glide.with(mContext).load(fileModel.path).into(imageView)
+            if (fileModel.isAndroidData) {
+                Glide.with(mContext).load(fileModel.uri).into(imageView)
+            } else {
+                Glide.with(mContext).load(fileModel.path).into(imageView)
+            }
         } else {
-            val s = AvatarUtils.generateDefaultAvatar(mContext, extension)
+            val s = if (mFileTypeBitmapMap.containsKey(extension)) {
+                mFileTypeBitmapMap[extension]
+            } else {
+                val bitmapPath =AvatarUtils.generateDefaultAvatar(mContext, extension)
+                mFileTypeBitmapMap[extension] = bitmapPath
+                bitmapPath
+            }
             Glide.with(mContext).load(s).into(imageView)
         }
         holder.apply {
@@ -125,6 +138,7 @@ open class FileAdapter(
                 gone()
             }
         }
+        //data目录标志
         val flag = holder.getView<ImageView>(R.id.iv_data_flag)
         flag.apply {
             if (fileModel.isAndroidData) {
@@ -160,14 +174,14 @@ open class FileAdapter(
                     )
                 } else {
                     //打开
-                    mBrowserItemOnClickListener?.onItemClick(it.context, fileModel)
+                    mBrowserItemOnClickListener?.onItemClick(it.context, holder, fileModel)
                 }
 
             }
 
             setOnLongClickListener {
                 if (!isSelectorMode) {
-                    mBrowserItemOnClickListener?.onItemLongClick(it.context, fileModel)
+                    mBrowserItemOnClickListener?.onItemLongClick(it.context, holder, fileModel)
                 }
                 true
             }

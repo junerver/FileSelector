@@ -1,5 +1,6 @@
 package xyz.junerver.sfbrowser
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AlertDialog
 import xyz.junerver.fileselector.*
@@ -11,6 +12,7 @@ import java.nio.file.Files
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
 
 
 class MainActivity : FileSelectorActivity() {

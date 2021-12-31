@@ -38,4 +38,5 @@ dependencies {
 
     implementation 'com.github.shichuanenhui:baseadapter:2.0.0'
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.1'
+    api 'com.mikhaellopez:circularprogressbar:3.1.0'
 }

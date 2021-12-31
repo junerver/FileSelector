@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.DocumentsContract
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -176,13 +177,14 @@ fun Context.getUriForFile(file: File): Uri {
         FileProvider.getUriForFile(
             this.applicationContext,
             "${this.packageName}.fileprovider",
-            file)
+            file
+        )
     } else {
         Uri.fromFile(file)
     }
 }
 
-fun Context.openFile(file:String){
+fun Context.openFile(file: String) {
     try {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -194,11 +196,11 @@ fun Context.openFile(file:String){
     }
 }
 
-fun Context.openUri(uri:String){
+fun Context.openFile(uri: Uri) {
     try {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.setDataAndType(Uri.parse(uri), MapTable.getMIMEType(uri))
+        intent.setDataAndType(uri, MapTable.getMIMEType(uri.toString()))
         this.startActivity(intent)
         Intent.createChooser(intent, "请选择对应的软件打开该附件！")
     } catch (e: ActivityNotFoundException) {
@@ -206,7 +208,35 @@ fun Context.openUri(uri:String){
     }
 }
 
-fun Context.shareFile(file:String){
+//打开document文件
+fun AppCompatActivity.openDocumentUri(uri: Uri) {
+    try {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)//必须
+        intent.type = "*/*"//必须
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
+        this.startActivityForResult(intent,777)
+        Intent.createChooser(intent, "请选择对应的软件打开该附件！")
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(this, "sorry附件不能打开，请下载相关软件！", Toast.LENGTH_SHORT).show()
+    }
+}
+
+//打开TreeUri
+fun Context.openDocumentTreeUri(uri: Uri) {
+    try {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
+        this.startActivity(intent)
+        Intent.createChooser(intent, "请选择对应的软件打开该附件！")
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(this, "sorry附件不能打开，请下载相关软件！", Toast.LENGTH_SHORT).show()
+    }
+}
+
+
+fun Context.shareFile(file: String) {
     try {
         val intent = Intent(Intent.ACTION_SEND)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -219,6 +249,7 @@ fun Context.shareFile(file:String){
 }
 
 fun String.isValidFileName(): Boolean {
-    val regex = "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
-    return Pattern.matches(regex,this)
+    val regex =
+        "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
+    return Pattern.matches(regex, this)
 }
