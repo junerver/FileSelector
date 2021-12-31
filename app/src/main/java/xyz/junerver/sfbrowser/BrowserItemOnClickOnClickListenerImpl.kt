@@ -36,9 +36,7 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
             i.putExtra("path", fileModel)
             ctx.startActivity(i)
         } else {
-            if (!fileModel.isAndroidData) {
-                ctx.openFile(fileModel.path)
-            } else {
+            fun extract() {
                 ctx.toast("请稍等...")
                 val target = File(ROOT_DIR + fileModel.name)
                 GlobalThreadPools.getInstance().execute {
@@ -50,10 +48,8 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                             try {
                                 val buffer = ByteArray(1024)
                                 var len: Int
-                                var total = 0
                                 while (((bis.read(buffer)).also { len = it }) != -1) {
                                     fos.write(buffer, 0, len)
-                                    total += len
                                 }
                                 Thread.sleep(100)
                                 postUI {
@@ -72,10 +68,16 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                     }
                 }
             }
+            if (!fileModel.isAndroidData) {
+                ctx.openFile(fileModel.path)
+            } else {
+//                ctx.openFile(fileModel.documentFile!!.uri)
+                extract()
+            }
         }
     }
 
-    override fun onItemLongClick(ctx: Context, holder: ViewHolder,fileModel: FileModel) {
+    override fun onItemLongClick(ctx: Context, holder: ViewHolder, fileModel: FileModel) {
         XPopup.Builder(ctx)
             .asBottomList(
                 "", MENU_ITEMS
@@ -98,7 +100,8 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                             }
                         } else {
                             //
-                            val circularProgressBar = holder.getView<CircularProgressBar>(R.id.circularProgressBar)
+                            val circularProgressBar =
+                                holder.getView<CircularProgressBar>(R.id.circularProgressBar)
                             circularProgressBar.apply {
                                 progressMax = 100f
                                 visibility = View.VISIBLE
@@ -127,7 +130,8 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                                                         circularProgressBar.setProgressWithAnimation(
                                                             (progress * 100).toFloat(),
                                                             100
-                                                        ) }
+                                                        )
+                                                    }
                                                     lastTime = currentTime
                                                 }
                                             }
