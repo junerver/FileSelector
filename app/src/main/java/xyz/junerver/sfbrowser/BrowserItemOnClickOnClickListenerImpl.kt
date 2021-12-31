@@ -30,7 +30,7 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
 
     override fun onItemClick(ctx: Context, holder: ViewHolder, fileModel: FileModel) {
         val ex = getExtension(fileModel.path).lowercase()
-        if (FileSelector.IMAGE_TYPES.contains(ex)) {
+        if (ex in FileSelector.IMAGE_TYPES) {
             //图片格式
             val i = Intent(ctx, PictureActivity::class.java)
             i.putExtra("path", fileModel)

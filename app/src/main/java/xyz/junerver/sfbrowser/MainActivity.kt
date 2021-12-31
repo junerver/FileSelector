@@ -26,6 +26,7 @@ class MainActivity : FileSelectorActivity() {
                 "wps", "doc", "docx", "txt", "xlsx", "xls", "pdf", "ppt", "pptx", "zip",
                 "rar", "7z", "exe", "gsp", "bbx","apk",
             )
+            .setDebug(BuildConfig.DEBUG)
 
         if (!File(ROOT_DIR).exists()) {
             File(ROOT_DIR).mkdirs()

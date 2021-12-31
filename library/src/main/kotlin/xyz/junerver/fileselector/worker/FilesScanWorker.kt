@@ -57,6 +57,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 } else {
                     //非data目录普通遍历
                     GlobalThreadPools.getInstance().execute { getFolderFiles(selectPath) }
+//                    GlobalThreadPools.getInstance().execute { getFolderFilesByKt(selectPath) }
                 }
             }
         } else {
@@ -97,9 +98,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 !(!FileSelector.isShowHidden && file.isHidden)
             } else {
                 if (FileSelector.mFileTypes.isNotEmpty()) {
-                    FileSelector.mFileTypes.find {
-                        it.lowercase() == getExtensionByName(file.name).lowercase()
-                    } != null
+                    getExtensionByName(file.name.toString()).lowercase() in FileSelector.mFileTypes
                 } else {
                     !(!FileSelector.isShowHidden && file.isHidden)
                 }
@@ -127,7 +126,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
         }
         if (fms.isNotEmpty()) {
             mFileModelSet.addAll(fms)
-            if (!mFilesIndexMap.keys.contains(absPath)) {
+            if (!mFilesIndexMap.containsKey(absPath)) {
                 mFilesIndexMap[absPath] = fms
                 mCallBack?.run {
                     postUI {
@@ -138,7 +137,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
         }
         for (dir in dirs) {
             val dirPath = dir.absolutePath
-            if (!mFilesIndexMap.keys.contains(dirPath)) {
+            if (!mFilesIndexMap.containsKey(dirPath)) {
                 //该路径下的文件未被遍历
                 if (FileSelector.ignorePaths.isNotEmpty()) {
                     for (ignorePath in FileSelector.ignorePaths) {
@@ -151,6 +150,39 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 }
             }
         }
+    }
+
+    /**
+     * Description:3000+文件遍历 速度较慢，大概需要8s左右，而使用多线程遍历则能控制在3s左右
+     * @author Junerver
+     * @date: 2021/12/31-16:42
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
+    private fun getFolderFilesByKt(path: String) {
+        //在该目录下走一圈，得到文件目录树结构
+        val fileTree: FileTreeWalk = File(path).walk()
+        fileTree.maxDepth(Int.MAX_VALUE) //需遍历的目录层级为1，即无需检查子目录
+            .filter { it.isFile } //只挑选文件，不处理文件夹
+            .filter { it.extension in FileSelector.mFileTypes } //选择扩展名为png和jpg的图片文件
+            .filter { !(!FileSelector.isShowHidden && it.isHidden) }
+            .forEach {
+                val fileModel = FileModel(
+                    it.absolutePath,
+                    getFileName(it.absolutePath),
+                    getExtension(it.absolutePath),
+                    it.length(),
+                    it.lastModified()
+                )
+                mFileModelSet.add(fileModel)
+                mCallBack?.run {
+                    postUI {
+                        onNext(arrayListOf(fileModel))
+                    }
+                }
+            } //循环处理符合条件的文件
     }
 
     /**
@@ -167,12 +199,9 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
             "data: ${documentFile.uri}  ${documentFile.isDirectory} +${Thread.currentThread().name}".log()
             val fms: MutableList<FileModel> = ArrayList()
             for (file in documentFile.listFiles()) {
-                if (file.isFile && TARGET_DIR_PATH.contains(documentFile.uri.toString())) {
+                if (file.isFile && documentFile.uri.toString() in TARGET_DIR_PATH) {
                     //文件
-                    val isFileTypeNeed = FileSelector.mFileTypes.find {
-                        it.lowercase() == getExtensionByName(file.name.toString()).lowercase()
-                    } != null
-                    if (isFileTypeNeed) {
+                    if (getExtensionByName(file.name.toString()).lowercase() in FileSelector.mFileTypes) {
                         val fileModel = FileModel(
                             URLDecoder.decode(
                                 FileUriUtils.treeToPath(file.uri.toString()),
@@ -190,10 +219,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     //目录
                     val path = file.uri.toString()
                     //只遍历允许遍历的文件夹
-                    val isInclude = INCLUDE_PACKAGE_DIR_LEVEL.find {
-                        path == it
-                    } != null
-                    if (isInclude) {
+                    if (path in INCLUDE_PACKAGE_DIR_LEVEL) {
                         INCLUDE_PACKAGE_DIR_LEVEL.remove(path)
                         GlobalThreadPools.getInstance().execute { getDataFolderFiles(file) }
                     }
@@ -201,7 +227,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
             }
             if (fms.isNotEmpty()) {
                 mFileModelSet.addAll(fms)
-                if (!mFilesIndexMap.keys.contains(documentFile.uri.path)) {
+                if (!mFilesIndexMap.containsKey(documentFile.uri.path)) {
                     mFilesIndexMap[documentFile.uri.path.toString()] = fms
                     mCallBack?.run {
                         postUI {

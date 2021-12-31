@@ -68,7 +68,8 @@ class FileSelector private constructor(ctx: Context) {
     }
 
     fun setFileType(vararg fileTypes: String): FileSelector {
-        mFileTypes = fileTypes as Array<String>
+        val types = fileTypes as Array<String>
+        mFileTypes  = types.map { it.lowercase() }.toTypedArray()
         return this
     }
 
@@ -165,7 +166,7 @@ class FileSelector private constructor(ctx: Context) {
         )
         internal var ignorePaths: Array<String> = arrayOf()
         private var instance: FileSelector? = null
-        internal var isDebugLog = true
+        internal var isDebugLog = false
 
         fun getInstance(context: Context): FileSelector {
             "++++++++++++++++++ Versin: $VERSION ++++++++++++++++++++++".log()
