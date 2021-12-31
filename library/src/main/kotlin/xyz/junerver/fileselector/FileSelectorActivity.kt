@@ -43,7 +43,7 @@ const val REQUEST_CODE_MANAGE_APP_ALL_FILES = 998
 //请求查找文件
 const val REQUEST_CODE_SEARCH_FILES = 998
 
-open class FileSelectorActivity : AppCompatActivity() {
+open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallBack {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
@@ -65,7 +65,7 @@ open class FileSelectorActivity : AppCompatActivity() {
 
     //用户当前选择的排序方式
     private var mCurrentSortType = FileSelector.mSortType
-    protected open lateinit var mContext: Context
+    private lateinit var mContext: Context
 
 
     @SuppressLint("MissingSuperCall")
@@ -151,8 +151,14 @@ open class FileSelectorActivity : AppCompatActivity() {
                 override fun onNext(fileModels: List<FileModel>) {
                     sortFileList(mCurrentSortType, fileModels as ArrayList<FileModel>)
                     val lastIndex = mFileModels.size
-                    mFileModels.addAll(fileModels)
-                    mFileAdapter.notifyItemRangeInserted(lastIndex, fileModels.size)
+                    if (!fileModels[0].isAndroidData) {
+                        mFileModels.addAll(fileModels)
+                        mFileAdapter.notifyItemRangeInserted(lastIndex, fileModels.size)
+                    } else {
+                        mFileModels.addAll(0, fileModels)
+                        mFileAdapter.notifyItemRangeInserted(0, fileModels.size)
+                    }
+
                     if (mFileModels.isEmpty()) {
                         empty.visible()
                         recyclerView.gone()
@@ -179,7 +185,7 @@ open class FileSelectorActivity : AppCompatActivity() {
             }).work()
     }
 
-    protected fun delItem(fileModel: FileModel) {
+    override fun delItem(fileModel: FileModel) {
         val index = mFileModels.indexOf(fileModel)
         if (index != -1) {
             mFileModels.remove(fileModel)
@@ -187,7 +193,7 @@ open class FileSelectorActivity : AppCompatActivity() {
         }
     }
 
-    protected fun changeItem(fileModel: FileModel) {
+    override fun changeItem(fileModel: FileModel) {
         val index = mFileModels.indexOf(fileModel)
         if (index != -1) {
             mFileAdapter.notifyItemChanged(index)
@@ -225,10 +231,10 @@ open class FileSelectorActivity : AppCompatActivity() {
                 BY_EXTENSION_DESC -> {
                     list.sortByDescending { it.extension }
                 }
-                BY_DATA_ASC->{
+                BY_DATA_ASC -> {
                     list.sortBy { it.isAndroidData }
                 }
-                BY_DATA_DESC->{
+                BY_DATA_DESC -> {
                     list.sortByDescending { it.isAndroidData }
                 }
             }

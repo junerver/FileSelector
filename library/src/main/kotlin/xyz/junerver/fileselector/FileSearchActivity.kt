@@ -23,7 +23,7 @@ import java.util.ArrayList
 //置信度
 const val CONFIDENCE_LEVEL = 0.05
 const val EXTRA_IS_SELECTOR_MODE = "isSelectorMode"
-open class FileSearchActivity : AppCompatActivity() {
+open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack {
 
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
@@ -132,7 +132,7 @@ open class FileSearchActivity : AppCompatActivity() {
         }
     }
 
-    protected fun delItem(fileModel: FileModel) {
+     override fun delItem(fileModel: FileModel) {
         val index = mResult.indexOf(fileModel)
         if (index != -1) {
             mResult.remove(fileModel)
@@ -140,7 +140,7 @@ open class FileSearchActivity : AppCompatActivity() {
         }
     }
 
-    protected fun changeItem(fileModel: FileModel) {
+    override fun changeItem(fileModel: FileModel) {
         val index = mResult.indexOf(fileModel)
         if (index != -1) {
             mFileAdapter.notifyItemChanged(index)

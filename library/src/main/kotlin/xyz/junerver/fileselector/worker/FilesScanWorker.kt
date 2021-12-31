@@ -9,6 +9,7 @@ import android.net.Uri
 
 import androidx.documentfile.provider.DocumentFile
 import java.lang.ref.SoftReference
+import java.net.URLDecoder
 
 
 /**
@@ -174,7 +175,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     } != null
                     if (isFileTypeNeed) {
                         val fileModel = FileModel(
-                            file.uri.path.toString(),
+                            URLDecoder.decode(FileUriUtils.treeToPath(file.uri.toString()),"UTF-8"),
                             file.name.toString(),
                             getExtensionByName(file.name.toString()),
                             file.length(),
@@ -238,6 +239,10 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg/Download"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm"),
+            //迅雷目录层级
+            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files/ThunderDownload"),
+            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files"),
+            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider"),
         )
     }
 

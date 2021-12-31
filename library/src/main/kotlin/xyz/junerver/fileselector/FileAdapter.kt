@@ -9,13 +9,17 @@ import com.bumptech.glide.Glide
 import com.lee.adapter.recyclerview.CommonAdapter
 import com.lee.adapter.recyclerview.base.ViewHolder
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView.SectionedAdapter
-import java.text.DecimalFormat
 import java.util.*
 
 /**
  * @author Lee
  */
-open class FileAdapter(context: Context?, layoutId: Int, private val modelList: List<FileModel>,private val isSelectorMode:Boolean = false) :
+open class FileAdapter(
+    context: Context?,
+    layoutId: Int,
+    private val modelList: List<FileModel>,
+    private val isSelectorMode: Boolean = false
+) :
     CommonAdapter<FileModel>(context, layoutId, modelList), SectionedAdapter {
 
     //最大选择数量
@@ -23,18 +27,19 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
 
     //主UI的右上角menu
     private var mCountMenuItem: MenuItem? = null
+
     //选择的文件
     private var mSelectedFileList: ArrayList<FileModel>? = null
 
-    interface BrowserItemListener{
-        fun onItemClick(path: String)
-        fun onItemLongClick(path: String,fileModel: FileModel)
+    interface BrowserItemOnClickListener {
+        fun onItemClick(ctx: Context, fileModel: FileModel)
+        fun onItemLongClick(ctx: Context, fileModel: FileModel)
     }
 
-    private var openItemListener: BrowserItemListener ?= null
+    private var mBrowserItemOnClickListener: BrowserItemOnClickListener? = null
 
-    fun setListener(listener: BrowserItemListener) {
-        openItemListener = listener
+    fun setListener(onClickListener: BrowserItemOnClickListener) {
+        mBrowserItemOnClickListener = onClickListener
     }
 
     fun setMaxSelect(max: Int) {
@@ -79,8 +84,11 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
             Glide.with(mContext).load(s).into(imageView)
         }
         holder.apply {
-           setText(R.id.tv_name, fileModel.name)
-           setText(R.id.tv_detail, getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size))
+            setText(R.id.tv_name, fileModel.name)
+            setText(
+                R.id.tv_detail,
+                getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size)
+            )
         }
         //勾选框配置
         val checkBox = holder.getView<SmoothCheckBox>(R.id.checkbox)
@@ -111,7 +119,7 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
                     java.lang.String.valueOf(FileSelector.maxCount)
                 )
             })
-           if (isSelectorMode) {
+            if (isSelectorMode) {
                 visible()
             } else {
                 gone()
@@ -126,41 +134,45 @@ open class FileAdapter(context: Context?, layoutId: Int, private val modelList: 
             }
         }
         val layout = holder.getView<RelativeLayout>(R.id.layout_item)
-        layout.setOnClickListener {
-            if (isSelectorMode) {
-                if (fileModel.isSelected) {
-                    mSelectedFileList?.remove(fileModel)
-                    fileModel.isSelected = false
-                } else {
-                    if (mSelectedFileList!!.size >= mMaxSelect) {
-                        Toast.makeText(
-                            mContext,
-                            "您最多只能选择" + FileSelector.maxCount.toString() + "个",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@setOnClickListener
+        layout.apply {
+            setOnClickListener {
+                if (isSelectorMode) {
+                    if (fileModel.isSelected) {
+                        mSelectedFileList?.remove(fileModel)
+                        fileModel.isSelected = false
+                    } else {
+                        if (mSelectedFileList!!.size >= mMaxSelect) {
+                            Toast.makeText(
+                                mContext,
+                                "您最多只能选择" + FileSelector.maxCount.toString() + "个",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@setOnClickListener
+                        }
+                        mSelectedFileList!!.add(fileModel)
+                        fileModel.isSelected = true
                     }
-                    mSelectedFileList!!.add(fileModel)
-                    fileModel.isSelected = true
+                    checkBox.setChecked(fileModel.isSelected, true)
+                    mCountMenuItem?.title = String.format(
+                        mContext.getString(R.string.selected_file_count),
+                        mSelectedFileList!!.size.toString(),
+                        java.lang.String.valueOf(FileSelector.maxCount)
+                    )
+                } else {
+                    //打开
+                    mBrowserItemOnClickListener?.onItemClick(it.context, fileModel)
                 }
-                checkBox.setChecked(fileModel.isSelected, true)
-                mCountMenuItem?.title = String.format(
-                    mContext.getString(R.string.selected_file_count),
-                    mSelectedFileList!!.size.toString(),
-                    java.lang.String.valueOf(FileSelector.maxCount)
-                )
-            } else {
-                //打开
-                openItemListener?.onItemClick(fileModel.path)
+
             }
 
-        }
-        layout.setOnLongClickListener{
-            if (!isSelectorMode) {
-                openItemListener?.onItemLongClick(fileModel.path,fileModel)
+            setOnLongClickListener {
+                if (!isSelectorMode) {
+                    mBrowserItemOnClickListener?.onItemLongClick(it.context, fileModel)
+                }
+                true
             }
-            true
         }
+
     }
 
     override fun getSectionName(position: Int): String {

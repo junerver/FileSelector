@@ -25,6 +25,7 @@ import java.io.FileFilter;
 public class FileUriUtils {
     public static String root = Environment.getExternalStorageDirectory().getPath() + "/";
 
+    //将uri转换成真实路径
     public static String treeToPath(String path) {
         String path2;
         if (path.contains("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary")) {
