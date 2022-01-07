@@ -1,6 +1,7 @@
 package xyz.junerver.fileselector
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Environment
@@ -69,7 +70,7 @@ class FileSelector private constructor(ctx: Context) {
 
     fun setFileType(vararg fileTypes: String): FileSelector {
         val types = fileTypes as Array<String>
-        mFileTypes  = types.map { it.lowercase() }.toTypedArray()
+        mFileTypes = types.map { it.lowercase() }.toTypedArray()
         return this
     }
 
@@ -91,24 +92,18 @@ class FileSelector private constructor(ctx: Context) {
     }
 
     /**
-    * Description: 主动请求权限，需要在resume中处理判断是否授权
-    * @author Junerver
-    * @date: 2021/12/30-9:09
-    * @Email: junerver@gmail.com
-    * @Version: v1.0
-    * @param
-    * @return
-    */
+     * Description: 主动请求权限，需要在resume中处理判断是否授权
+     * @author Junerver
+     * @date: 2021/12/30-9:09
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     fun requestManagerFiles() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-            //没有文件管理权限去申请
-            mSrCtx.get()?.apply {
-                showManagerFileTips(
-                    request = {
-                        startActivity(it)
-                    }
-                )
-            }
+        //没有文件管理权限去申请
+        mSrCtx.get()?.apply {
+            startActivity(Intent(this,RequestPermissionsActivity::class.java))
         }
     }
 
@@ -150,7 +145,29 @@ class FileSelector private constructor(ctx: Context) {
         const val BY_DATA_DESC = 9
 
         val IMAGE_TYPES: Array<String> = arrayOf(
-            "bmp","jpeg","jpg","png","tif","gif","pcx","tga","exif","fpx","svg","psd","cdr","pcd","dxf","ufo","eps","ai","raw","WMF","webp","avif","apng"
+            "bmp",
+            "jpeg",
+            "jpg",
+            "png",
+            "tif",
+            "gif",
+            "pcx",
+            "tga",
+            "exif",
+            "fpx",
+            "svg",
+            "psd",
+            "cdr",
+            "pcd",
+            "dxf",
+            "ufo",
+            "eps",
+            "ai",
+            "raw",
+            "WMF",
+            "webp",
+            "avif",
+            "apng"
         )
         val VIDEO_TYPES: Array<String> = arrayOf()
         val DOC_TYPES: Array<String> = arrayOf()
@@ -160,7 +177,7 @@ class FileSelector private constructor(ctx: Context) {
         internal var maxCount = 9
         internal var barColor = Color.parseColor("#1bbc9b")
         internal var isShowHidden = false
-        internal var selectPaths: Array<String> =arrayOf(
+        internal var selectPaths: Array<String> = arrayOf(
             "/storage/emulated/0/",
             "/storage/emulated/0/Android/data/",
         )

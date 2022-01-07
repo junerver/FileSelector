@@ -10,6 +10,11 @@
         tools:ignore="ScopedStorage" />
 
     <application android:requestLegacyExternalStorage="true">
+        <activity android:name=".RequestPermissionsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:multiprocess="true"
+            android:theme="@style/ActivityTranslucent"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden"/>
         <activity
             android:name=".FileSearchActivity"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize" />
