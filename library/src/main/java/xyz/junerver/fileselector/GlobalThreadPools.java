@@ -97,7 +97,9 @@ public class GlobalThreadPools {
      * @return 等待执行的任务列表
      */
     public void shutdownNow() {
-        THREAD_POOL_EXECUTOR.shutdownNow();
+        if (THREAD_POOL_EXECUTOR != null) {
+            THREAD_POOL_EXECUTOR.shutdownNow();
+        }
         THREAD_POOL_EXECUTOR = null;
     }
 
@@ -108,7 +110,9 @@ public class GlobalThreadPools {
      * 如果任务已经执行完了没有必要再调用这个方法
      */
     public void shutDown() {
-        THREAD_POOL_EXECUTOR.shutdown();
+        if (THREAD_POOL_EXECUTOR != null) {
+            THREAD_POOL_EXECUTOR.shutdown();
+        }
         sPoolWorkQueue.clear();
     }
 
