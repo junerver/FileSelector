@@ -24,7 +24,13 @@ import java.util.ArrayList
 //置信度
 const val CONFIDENCE_LEVEL = 0.05
 const val EXTRA_IS_SELECTOR_MODE = "isSelectorMode"
-open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack {
+
+/**
+ * Description: 文件搜索页面
+ * @author Junerver
+ * @Email: junerver@gmail.com
+ */
+open class FileSearchActivity : AppCompatActivity(), OperateFileModelItemCallBack {
 
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
@@ -36,7 +42,7 @@ open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack
     private val mSelectedFileList = ArrayList<FileModel>()
     private val ro = RatcliffObershelp()
     var mSearchItem: MenuItem? = null
-    var mSearchView:SearchView?= null
+    var mSearchView: SearchView? = null
     protected open lateinit var mContext: Context
 
     @SuppressLint("MissingSuperCall")
@@ -56,7 +62,12 @@ open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack
     }
 
     protected open fun initAdapter() {
-        mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mResult,intent.getBooleanExtra(EXTRA_IS_SELECTOR_MODE, true))
+        mFileAdapter = FileAdapter(
+            this,
+            R.layout.item_file_selector,
+            mResult,
+            intent.getBooleanExtra(EXTRA_IS_SELECTOR_MODE, true)
+        )
         mFileAdapter.setSelectedFileList(mSelectedFileList)
         mFileAdapter.setMaxSelect(intent.getIntExtra("remainder", 0))
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -115,16 +126,18 @@ open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack
     override fun onResume() {
         super.onResume()
         clearFocus()
-        SoftKeyBoardListener.setListener(this, object :SoftKeyBoardListener.OnSoftKeyBoardChangeListener{
-            override fun keyBoardShow(height: Int) {}
+        SoftKeyBoardListener.setListener(
+            this,
+            object : SoftKeyBoardListener.OnSoftKeyBoardChangeListener {
+                override fun keyBoardShow(height: Int) {}
 
-            override fun keyBoardHide(height: Int) {
-                clearFocus()
-            }
-        })
+                override fun keyBoardHide(height: Int) {
+                    clearFocus()
+                }
+            })
     }
 
-    private fun clearFocus(){
+    private fun clearFocus() {
         mSearchView?.let {
             it.clearFocus()
             root.apply {
@@ -134,7 +147,7 @@ open class FileSearchActivity : AppCompatActivity(),OperateFileModelItemCallBack
         }
     }
 
-     override fun delItem(fileModel: FileModel) {
+    override fun delItem(fileModel: FileModel) {
         val index = mResult.indexOf(fileModel)
         if (index != -1) {
             mResult.remove(fileModel)

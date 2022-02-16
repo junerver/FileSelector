@@ -42,7 +42,12 @@ const val REQUEST_CODE_MANAGE_APP_ALL_FILES = 998
 
 //请求查找文件
 const val REQUEST_CODE_SEARCH_FILES = 998
-
+/**
+* Description: 文件选择器界面
+* @author Junerver
+* @Email: junerver@gmail.com
+* @Version: v1.0
+*/
 open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallBack {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: FastScrollRecyclerView

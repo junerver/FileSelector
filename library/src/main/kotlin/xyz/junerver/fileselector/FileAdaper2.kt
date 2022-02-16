@@ -1,28 +1,34 @@
 package xyz.junerver.fileselector
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.lee.adapter.recyclerview.CommonAdapter
-import com.lee.adapter.recyclerview.base.ViewHolder
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView.SectionedAdapter
-import java.util.*
-import kotlin.collections.HashMap
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+import java.util.ArrayList
 
 /**
- * @author Lee
+ * Description:
+ * @author Junerver
+ * date: 2022/2/16-14:53
+ * Email: junerver@gmail.com
+ * Version: v1.0
  */
-open class FileAdapter(
-    context: Context?,
-    layoutId: Int,
+class FileAdaper2(
+    private val mContext: Context,
+    private val layoutId: Int,
     private val modelList: List<FileModel>,
     //是否为选择器模式
     private val isSelectorMode: Boolean = false
-) :
-    CommonAdapter<FileModel>(context, layoutId, modelList), SectionedAdapter {
+): RecyclerView.Adapter<FileAdaper2.ViewHolder>(), FastScrollRecyclerView.SectionedAdapter {
 
     //最大选择数量
     private var mMaxSelect = FileSelector.maxCount
@@ -58,8 +64,22 @@ open class FileAdapter(
         this.mSelectedFileList = mSelectedFileList
     }
 
-    override fun convert(holder: ViewHolder, fileModel: FileModel, position: Int) {
-        val imageView = holder.getView<ImageView>(R.id.iv_type)
+    override fun getSectionName(position: Int): String {
+        val namePinyin = CharacterParser.getInstance().getSpelling(
+            modelList[position].name
+        )
+        return namePinyin.substring(0, 1).uppercase()
+    }
+
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val root = LayoutInflater.from(mContext).inflate(R.layout.item_file_selector, parent, false)
+        return ViewHolder(root)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val fileModel = modelList[position]
+        val imageView = holder.imageView
         val extension = fileModel.extension
         if (extension.equals("gif", ignoreCase = true)) {
             Glide.with(mContext).asGif().load(fileModel.path).into(imageView)
@@ -98,14 +118,11 @@ open class FileAdapter(
             Glide.with(mContext).load(s).into(imageView)
         }
         holder.apply {
-            setText(R.id.tv_name, fileModel.name)
-            setText(
-                R.id.tv_detail,
-                getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size)
-            )
+            name.text = fileModel.name
+            detail.text = "${getDateTime(fileModel.date)}  -  ${formatFileSize(fileModel.size)}"
         }
         //勾选框配置
-        val checkBox = holder.getView<SmoothCheckBox>(R.id.checkbox)
+        val checkBox = holder.checkBox
         checkBox.apply {
             setOnCheckedChangeListener(null)
             setChecked(fileModel.isSelected, false)
@@ -140,7 +157,7 @@ open class FileAdapter(
             }
         }
         //data目录标志
-        val flag = holder.getView<ImageView>(R.id.iv_data_flag)
+        val flag = holder.flag
         flag.apply {
             if (fileModel.isAndroidData) {
                 visible()
@@ -148,7 +165,7 @@ open class FileAdapter(
                 gone()
             }
         }
-        val layout = holder.getView<RelativeLayout>(R.id.layout_item)
+        val layout = holder.layout
         layout.apply {
             setOnClickListener {
                 if (isSelectorMode) {
@@ -187,13 +204,20 @@ open class FileAdapter(
                 true
             }
         }
-
     }
 
-    override fun getSectionName(position: Int): String {
-        val namePinyin = CharacterParser.getInstance().getSpelling(
-            modelList[position].name
-        )
-        return namePinyin.substring(0, 1).uppercase()
+    override fun getItemCount(): Int {
+        return modelList.size
     }
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageView: ImageView = itemView.findViewById(R.id.iv_type)
+        val checkBox: SmoothCheckBox = itemView.findViewById(R.id.checkbox)
+        val flag: ImageView = itemView.findViewById(R.id.iv_data_flag)
+        val layout: RelativeLayout = itemView.findViewById(R.id.layout_item)
+        val name: TextView = itemView.findViewById(R.id.tv_name)
+        val detail: TextView = itemView.findViewById(R.id.tv_detail)
+        val circularProgressBar: CircularProgressBar =itemView.findViewById(R.id.circularProgressBar)
+    }
+
 }
