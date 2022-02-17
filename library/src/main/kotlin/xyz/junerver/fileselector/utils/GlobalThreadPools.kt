@@ -1,76 +1,34 @@
-package xyz.junerver.fileselector;
+package xyz.junerver.fileselector.utils
 
-import android.util.Log;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.Runnable
+import java.util.concurrent.atomic.AtomicInteger
+import java.lang.Thread
+import java.util.concurrent.*
 
 /**
  * 全局使用的线程池
  */
-public class GlobalThreadPools {
-
-    private static String TAG = GlobalThreadPools.class.getSimpleName();
-    //线程池
-    private static ThreadPoolExecutor THREAD_POOL_EXECUTOR;
-    //CPU数量
-    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    //核心线程数
-    private static final int CORE_POOL_SIZE = CPU_COUNT;
-    //最大线程数
-    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2;
-    //线程闲置后的存活时间
-    private static final int KEEP_ALIVE_SECONDS = 60;
-    //任务队列
-    private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<>();
-    //线程工厂
-    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
-        private final AtomicInteger mCount = new AtomicInteger(1);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "MangoTask #" + mCount.getAndIncrement());
-        }
-    };
-
+class GlobalThreadPools private constructor() {
     //初始化线程池
-    private void initThreadPool() {
-        THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
-                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-                sPoolWorkQueue, sThreadFactory, new RejectedHandler());
+    private fun initThreadPool() {
+        THREAD_POOL_EXECUTOR = ThreadPoolExecutor(
+            CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS.toLong(), TimeUnit.SECONDS,
+            sPoolWorkQueue, sThreadFactory, RejectedHandler()
+        )
     }
 
-    private static class RejectedHandler implements RejectedExecutionHandler {
-        @Override
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+    private class RejectedHandler : RejectedExecutionHandler {
+        override fun rejectedExecution(r: Runnable, executor: ThreadPoolExecutor) {
             //可在这里做一些提示用户的操作
 //            Log.v("+++","is over the max task...");
         }
     }
 
-    private static GlobalThreadPools instance;
-
-    private GlobalThreadPools() {
-        initThreadPool();
-    }
-
-    public static GlobalThreadPools getInstance() {
-        if (instance == null) {
-            instance = new GlobalThreadPools();
-        }
-        return instance;
-    }
-
-    public void execute(Runnable command) {
+    fun execute(command: Runnable?) {
         if (THREAD_POOL_EXECUTOR == null) {
-            initThreadPool();
+            initThreadPool()
         }
-        THREAD_POOL_EXECUTOR.execute(command);
+        THREAD_POOL_EXECUTOR!!.execute(command)
     }
 
     /**
@@ -78,14 +36,12 @@ public class GlobalThreadPools {
      *
      * @return
      */
-    public boolean hasDone() {
-        if (THREAD_POOL_EXECUTOR != null) {
-//            Log.d("FileSelector","queue: "+THREAD_POOL_EXECUTOR.getQueue().size()+"  active: " +THREAD_POOL_EXECUTOR.getActiveCount());
-            return THREAD_POOL_EXECUTOR.getQueue().size() + THREAD_POOL_EXECUTOR.getActiveCount() == 0;
+    fun hasDone(): Boolean {
+        return if (THREAD_POOL_EXECUTOR != null) {
+            THREAD_POOL_EXECUTOR!!.queue.size + THREAD_POOL_EXECUTOR!!.activeCount == 0
         } else {
             //线程池已经置空任务结束
-//            Log.d("FileSelector","++++++++++++++++++++++  null  ++++++++++++++++++++");
-            return true;
+            true
         }
     }
 
@@ -96,9 +52,9 @@ public class GlobalThreadPools {
      *
      * @return 等待执行的任务列表
      */
-    public void shutdownNow() {
-        THREAD_POOL_EXECUTOR.shutdownNow();
-        THREAD_POOL_EXECUTOR = null;
+    fun shutdownNow() {
+        THREAD_POOL_EXECUTOR?.shutdownNow()
+        THREAD_POOL_EXECUTOR = null
     }
 
     /**
@@ -107,9 +63,50 @@ public class GlobalThreadPools {
      * 已经执行的任务会继续执行
      * 如果任务已经执行完了没有必要再调用这个方法
      */
-    public void shutDown() {
-        THREAD_POOL_EXECUTOR.shutdown();
-        sPoolWorkQueue.clear();
+    fun shutDown() {
+        THREAD_POOL_EXECUTOR?.shutdown()
+        sPoolWorkQueue.clear()
     }
 
+    companion object {
+        private val TAG = GlobalThreadPools::class.java.simpleName
+
+        //线程池
+        private var THREAD_POOL_EXECUTOR: ThreadPoolExecutor? = null
+
+        //CPU数量
+        private val CPU_COUNT = Runtime.getRuntime().availableProcessors()
+
+        //核心线程数
+        private val CORE_POOL_SIZE = CPU_COUNT
+
+        //最大线程数
+        private val MAXIMUM_POOL_SIZE = CPU_COUNT * 2
+
+        //线程闲置后的存活时间
+        private const val KEEP_ALIVE_SECONDS = 60
+
+        //任务队列
+        private val sPoolWorkQueue: BlockingQueue<Runnable> = LinkedBlockingQueue()
+
+        //线程工厂
+        private val sThreadFactory: ThreadFactory = object : ThreadFactory {
+            private val mCount = AtomicInteger(1)
+            override fun newThread(r: Runnable): Thread {
+                return Thread(r, "MangoTask #" + mCount.getAndIncrement())
+            }
+        }
+        var instance: GlobalThreadPools? = null
+            get() {
+                if (field == null) {
+                    field = GlobalThreadPools()
+                }
+                return field
+            }
+            private set
+    }
+
+    init {
+        initThreadPool()
+    }
 }

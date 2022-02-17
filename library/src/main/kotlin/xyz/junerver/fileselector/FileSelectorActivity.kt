@@ -28,6 +28,7 @@ import xyz.junerver.fileselector.FileSelector.Companion.BY_SIZE_DESC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_ASC
 import xyz.junerver.fileselector.FileSelector.Companion.BY_TIME_DESC
 import xyz.junerver.fileselector.PermissionsUtils.PermissionsResult
+import xyz.junerver.fileselector.utils.GlobalThreadPools
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import xyz.junerver.fileselector.worker.ActivityUIWorker
 import java.lang.ref.SoftReference
@@ -372,7 +373,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
         if (ActivityUIWorker.listener != null) {
             ActivityUIWorker.listener!!.onCancel()
         }
-        GlobalThreadPools.getInstance().shutdownNow()
+        GlobalThreadPools.instance?.shutdownNow()
         finish()
     }
 

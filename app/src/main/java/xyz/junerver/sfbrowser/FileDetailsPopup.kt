@@ -9,9 +9,7 @@ import com.lxj.xpopup.core.BottomPopupView
 import xyz.junerver.fileselector.FileModel
 import xyz.junerver.fileselector.formatFileSize
 import xyz.junerver.fileselector.getDateTime
-import com.lxj.xpopup.util.XPopupUtils
-import xyz.junerver.fileselector.AvatarUtils
-import kotlin.math.roundToInt
+import xyz.junerver.fileselector.utils.AvatarUtils
 
 
 /**

@@ -2,32 +2,39 @@ package xyz.junerver.fileselector
 
 import android.content.Context
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.lee.adapter.recyclerview.CommonAdapter
-import com.lee.adapter.recyclerview.base.ViewHolder
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView.SectionedAdapter
-import java.util.*
-import kotlin.collections.HashMap
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+import xyz.junerver.fileselector.utils.AvatarUtils
+import xyz.junerver.fileselector.utils.CharacterParserUtils
+import java.util.ArrayList
 
 /**
- * @author Lee
+ * Description:
+ * @author Junerver
+ * date: 2022/2/16-14:53
+ * Email: junerver@gmail.com
+ * Version: v1.0
  */
-open class FileAdapter(
-    context: Context?,
-    layoutId: Int,
+class FileAdapter(
+    private val mContext: Context,
+    private val layoutId: Int,
     private val modelList: List<FileModel>,
     //是否为选择器模式
     private val isSelectorMode: Boolean = false
-) :
-    CommonAdapter<FileModel>(context, layoutId, modelList), SectionedAdapter {
+) : RecyclerView.Adapter<FileAdapter.ViewHolder>(), FastScrollRecyclerView.SectionedAdapter {
 
     //最大选择数量
     private var mMaxSelect = FileSelector.maxCount
 
-    private val mFileTypeBitmapMap = HashMap<String,String>()
+    private val mFileTypeBitmapMap = HashMap<String, String>()
 
     //主UI的右上角menu
     private var mCountMenuItem: MenuItem? = null
@@ -58,12 +65,25 @@ open class FileAdapter(
         this.mSelectedFileList = mSelectedFileList
     }
 
-    override fun convert(holder: ViewHolder, fileModel: FileModel, position: Int) {
-        val imageView = holder.getView<ImageView>(R.id.iv_type)
+    override fun getSectionName(position: Int): String {
+        val namePinyin = CharacterParserUtils.getSpelling(
+            modelList[position].name
+        )
+        return namePinyin.substring(0, 1).uppercase()
+    }
+
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val root = mContext.inflater(R.layout.item_file_selector, parent, false)
+        return ViewHolder(root)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val fileModel = modelList[position]
+        val imageView = holder.imageView
         val extension = fileModel.extension
-        if (extension.equals("gif", ignoreCase = true)) {
-            Glide.with(mContext).asGif().load(fileModel.path).into(imageView)
-        } else if (extension.equals("jpg", ignoreCase = true) ||
+        if (extension.equals("gif", ignoreCase = true) ||
+            extension.equals("jpg", ignoreCase = true) ||
             extension.equals("png", ignoreCase = true) ||
             extension.equals("bmp", ignoreCase = true) ||
             extension.equals("jpeg", ignoreCase = true) ||
@@ -83,29 +103,26 @@ open class FileAdapter(
             extension.equals("mov", ignoreCase = true)
         ) {
             if (fileModel.isAndroidData) {
-                Glide.with(mContext).load(fileModel.uri).into(imageView)
+                imageView.load(fileModel.uri)
             } else {
-                Glide.with(mContext).load(fileModel.path).into(imageView)
+                imageView.load(fileModel.path)
             }
         } else {
             val s = if (mFileTypeBitmapMap.containsKey(extension)) {
                 mFileTypeBitmapMap[extension]
             } else {
-                val bitmapPath =AvatarUtils.generateDefaultAvatar(mContext, extension)
+                val bitmapPath = AvatarUtils.generateDefaultAvatar(mContext, extension)
                 mFileTypeBitmapMap[extension] = bitmapPath
                 bitmapPath
             }
             Glide.with(mContext).load(s).into(imageView)
         }
         holder.apply {
-            setText(R.id.tv_name, fileModel.name)
-            setText(
-                R.id.tv_detail,
-                getDateTime(fileModel.date) + "  -  " + formatFileSize(fileModel.size)
-            )
+            name.text = fileModel.name
+            detail.text = "${getDateTime(fileModel.date)}  -  ${formatFileSize(fileModel.size)}"
         }
         //勾选框配置
-        val checkBox = holder.getView<SmoothCheckBox>(R.id.checkbox)
+        val checkBox = holder.checkBox
         checkBox.apply {
             setOnCheckedChangeListener(null)
             setChecked(fileModel.isSelected, false)
@@ -140,15 +157,18 @@ open class FileAdapter(
             }
         }
         //data目录标志
-        val flag = holder.getView<ImageView>(R.id.iv_data_flag)
+        val flag = holder.flag
         flag.apply {
             if (fileModel.isAndroidData) {
-                visible()
+                FileSelector.ICON_MAP[getFileParentPath(fileModel.path)]?.let {
+                    setImageDrawable(this.context.getDrawableRes(it))
+                    this.visible()
+                } ?: run { gone() }
             } else {
                 gone()
             }
         }
-        val layout = holder.getView<RelativeLayout>(R.id.layout_item)
+        val layout = holder.layout
         layout.apply {
             setOnClickListener {
                 if (isSelectorMode) {
@@ -177,7 +197,6 @@ open class FileAdapter(
                     //打开
                     mBrowserItemOnClickListener?.onItemClick(it.context, holder, fileModel)
                 }
-
             }
 
             setOnLongClickListener {
@@ -187,13 +206,28 @@ open class FileAdapter(
                 true
             }
         }
-
     }
 
-    override fun getSectionName(position: Int): String {
-        val namePinyin = CharacterParser.getInstance().getSpelling(
-            modelList[position].name
-        )
-        return namePinyin.substring(0, 1).uppercase()
+    override fun getItemCount(): Int {
+        return modelList.size
+    }
+
+    override fun onViewRecycled(holder: ViewHolder) {
+        holder.imageView.apply {
+            this.setImageDrawable(null)
+            Glide.with(this).clear(this)
+        }
+        super.onViewRecycled(holder)
+    }
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageView: ImageView = itemView.findViewById(R.id.iv_type)
+        val checkBox: SmoothCheckBox = itemView.findViewById(R.id.checkbox)
+        val flag: ImageView = itemView.findViewById(R.id.iv_data_flag)
+        val layout: RelativeLayout = itemView.findViewById(R.id.layout_item)
+        val name: TextView = itemView.findViewById(R.id.tv_name)
+        val detail: TextView = itemView.findViewById(R.id.tv_detail)
+        val circularProgressBar: CircularProgressBar =
+            itemView.findViewById(R.id.circularProgressBar)
     }
 }

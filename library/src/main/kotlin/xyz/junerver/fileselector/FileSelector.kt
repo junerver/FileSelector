@@ -8,6 +8,7 @@ import android.os.Environment
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import xyz.junerver.fileselector.worker.ANDROID_DATA_PATH
 import xyz.junerver.fileselector.worker.ActivityUIWorker
 import xyz.junerver.fileselector.worker.FilesScanWorker
 import java.lang.ref.SoftReference
@@ -20,7 +21,7 @@ import java.lang.ref.SoftReference
  * Version: v1.0
  */
 
-const val VERSION = "0.1.15"
+const val VERSION = "0.1.17"
 
 class FileSelector private constructor(ctx: Context) {
     //使用软引用持有ctx对象以避免内存泄漏
@@ -144,30 +145,18 @@ class FileSelector private constructor(ctx: Context) {
         const val BY_DATA_ASC = 8
         const val BY_DATA_DESC = 9
 
+        const val TARGET_DIR_PATH_QQ = "$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent/QQfile_recv"
+        const val TARGET_DIR_PATH_WECHAT = "$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg/Download"
+        const val TARGET_DIR_PATH_THUNDER = "$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files/ThunderDownload"
+
+        val ICON_MAP = mapOf(
+            TARGET_DIR_PATH_QQ to R.drawable.icon_qq,
+            TARGET_DIR_PATH_WECHAT to R.drawable.icon_wechat,
+            TARGET_DIR_PATH_THUNDER to R.drawable.icon_thunder
+        )
+
         val IMAGE_TYPES: Array<String> = arrayOf(
-            "bmp",
-            "jpeg",
-            "jpg",
-            "png",
-            "tif",
-            "gif",
-            "pcx",
-            "tga",
-            "exif",
-            "fpx",
-            "svg",
-            "psd",
-            "cdr",
-            "pcd",
-            "dxf",
-            "ufo",
-            "eps",
-            "ai",
-            "raw",
-            "WMF",
-            "webp",
-            "avif",
-            "apng"
+            "bmp", "jpeg", "jpg", "png", "tif", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd", "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "WMF", "webp", "avif", "apng"
         )
         val VIDEO_TYPES: Array<String> = arrayOf()
         val DOC_TYPES: Array<String> = arrayOf()

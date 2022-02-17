@@ -17,13 +17,6 @@ buildscript {
 
 allprojects {
     repositories {
-		maven {
-            credentials {
-                username '5f605b28fa82bfeb803bd47b'
-                password 'v65jpzJytr0D'
-            }
-            url 'https://packages.aliyun.com/maven/repository/2084610-release-cn385Q/'
-        }
         maven { url "https://www.jitpack.io" }
         google()
         mavenCentral()
@@ -33,8 +26,8 @@ allprojects {
         buildToolsVersion = '31.0.0'
         minSdkVersion = 26
         targetSdkVersion = 26
-        versionCode = 23
-        versionName = '0.1.15'
+        versionCode = 16
+        versionName = '1.1.4'
     }
 }
 

@@ -5,14 +5,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import com.lee.adapter.recyclerview.base.ViewHolder
 import com.lxj.xpopup.XPopup
-import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import xyz.junerver.fileselector.*
-import xyz.junerver.fileselector.R
+import xyz.junerver.fileselector.utils.GlobalThreadPools
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -28,7 +24,7 @@ import java.nio.file.Files
 class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileModelItemCallBack) :
     FileAdapter.BrowserItemOnClickListener {
 
-    override fun onItemClick(ctx: Context, holder: ViewHolder, fileModel: FileModel) {
+    override fun onItemClick(ctx: Context, holder: FileAdapter.ViewHolder, fileModel: FileModel) {
         val ex = getExtension(fileModel.path).lowercase()
         if (ex in FileSelector.IMAGE_TYPES) {
             //图片格式
@@ -37,47 +33,42 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
             ctx.startActivity(i)
         } else {
             fun extract() {
-                ctx.toast("请稍等...")
                 val target = File(ROOT_DIR + fileModel.name)
-                GlobalThreadPools.getInstance().execute {
-                    fileModel.documentFile?.let { doc ->
-                        val fis = ctx.contentResolver.openInputStream(doc.uri)
-                        fis?.let { `is` ->
-                            val bis = BufferedInputStream(`is`)
-                            val fos = FileOutputStream(target)
-                            try {
-                                val buffer = ByteArray(1024)
-                                var len: Int
-                                while (((bis.read(buffer)).also { len = it }) != -1) {
-                                    fos.write(buffer, 0, len)
-                                }
-                                Thread.sleep(100)
-                                postUI {
-                                    ctx.openFile(target.path)
-                                }
-                            } catch (e: Exception) {
-                                postUI {
-                                    ctx.toast("文件打开失败！")
-                                }
-                            } finally {
-                                fos.close()
-                                bis.close()
-                                `is`.close()
-                            }
-                        }
+                if (target.exists() && target.isFile && target.length() > 0) {
+                    postUI {
+                        ctx.openFile(target.path)
                     }
+                } else {
+                    ctx.toast("请稍等...")
+                    val circularProgressBar =
+                        holder.circularProgressBar
+                    circularProgressBar.apply {
+                        progressMax = 100f
+                        visibility = View.VISIBLE
+                    }
+                    extractDocument(fileModel, ctx, target, {
+                        circularProgressBar.gone()
+                        ctx.openFile(target.path)
+                    }, {
+                        ctx.toast("文件打开失败！")
+                    },{
+                        circularProgressBar.setProgressWithAnimation(it, 100)
+                    })
                 }
             }
             if (!fileModel.isAndroidData) {
                 ctx.openFile(fileModel.path)
             } else {
-//                ctx.openFile(fileModel.documentFile!!.uri)
                 extract()
             }
         }
     }
 
-    override fun onItemLongClick(ctx: Context, holder: ViewHolder, fileModel: FileModel) {
+    override fun onItemLongClick(
+        ctx: Context,
+        holder: FileAdapter.ViewHolder,
+        fileModel: FileModel
+    ) {
         XPopup.Builder(ctx)
             .asBottomList(
                 "", MENU_ITEMS
@@ -101,57 +92,19 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                         } else {
                             //
                             val circularProgressBar =
-                                holder.getView<CircularProgressBar>(R.id.circularProgressBar)
+                                holder.circularProgressBar
                             circularProgressBar.apply {
                                 progressMax = 100f
                                 visibility = View.VISIBLE
                             }
-                            GlobalThreadPools.getInstance().execute {
-                                fileModel.documentFile?.let { doc ->
-                                    val fis = ctx.contentResolver.openInputStream(doc.uri)
-                                    fis?.let { `is` ->
-                                        val bis = BufferedInputStream(`is`)
-                                        val fos = FileOutputStream(target)
-                                        try {
-                                            val buffer = ByteArray(1024)
-                                            var len: Int
-                                            var total = 0
-                                            var lastTime = System.currentTimeMillis()
-                                            while (((bis.read(buffer)).also { len = it }) != -1) {
-                                                fos.write(buffer, 0, len)
-                                                total += len
-                                                //获取当前下载量
-                                                val progress: Double =
-                                                    total.toDouble() / fileModel.size
-                                                val currentTime = System.currentTimeMillis()
-                                                if (currentTime - lastTime > 100) {
-                                                    //每100ms刷新一次UI
-                                                    postUI {
-                                                        circularProgressBar.setProgressWithAnimation(
-                                                            (progress * 100).toFloat(),
-                                                            100
-                                                        )
-                                                    }
-                                                    lastTime = currentTime
-                                                }
-                                            }
-                                            Thread.sleep(100)
-                                            postUI {
-                                                circularProgressBar.gone()
-                                                ctx.toast("文件提取成功：${target.path}")
-                                            }
-                                        } catch (e: Exception) {
-                                            postUI {
-                                                ctx.toast("文件提取失败！")
-                                            }
-                                        } finally {
-                                            fos.close()
-                                            bis.close()
-                                            `is`.close()
-                                        }
-                                    }
-                                }
-                            }
+                            extractDocument(fileModel, ctx, target, {
+                                circularProgressBar.gone()
+                                ctx.toast("文件提取成功：${target.path}")
+                            }, {
+                                ctx.toast("文件提取失败！")
+                            }, {
+                                circularProgressBar.setProgressWithAnimation(it, 100)
+                            })
                         }
                     }
                     DELETE -> {
@@ -204,7 +157,7 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                         }
                         if (oldFile.exists() && oldFile.isFile && !fileModel.isAndroidData) {
                             showRenamePopup { newName ->
-                                val target = File(oldFile.parent + File.separator + newName)
+                                val target = File(oldFile.parent!! + File.separator + newName)
                                 oldFile.renameTo(target)
                                 fileModel.update(target)
                             }
@@ -229,6 +182,59 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
         private const val SEE_DETAIL = "查看详情"
         private const val RENAME = "重命名"
         private val MENU_ITEMS = arrayOf(EXTRACT_FILE, DELETE, COPY_PATH, SEE_DETAIL, RENAME)
+
+        private fun extractDocument(
+            fileModel: FileModel,
+            ctx: Context,
+            target: File,
+            onSuccess: () -> Unit = {},
+            onError: () -> Unit = {},
+            onProgressChange: (Float) -> Unit = {}
+        ) {
+
+            GlobalThreadPools.instance?.execute {
+                fileModel.documentFile?.let { doc ->
+                    val fis = ctx.contentResolver.openInputStream(doc.uri)
+                    fis?.let { `is` ->
+                        val bis = BufferedInputStream(`is`)
+                        val fos = FileOutputStream(target)
+                        try {
+                            val buffer = ByteArray(1024)
+                            var len: Int
+                            var total = 0
+                            var lastTime = System.currentTimeMillis()
+                            while (((bis.read(buffer)).also { len = it }) != -1) {
+                                fos.write(buffer, 0, len)
+                                total += len
+                                //获取当前下载量
+                                val progress: Double =
+                                    total.toDouble() / fileModel.size
+                                val currentTime = System.currentTimeMillis()
+                                if (currentTime - lastTime > 100) {
+                                    //每100ms刷新一次UI
+                                    postUI {
+                                        onProgressChange((progress * 100).toFloat())
+                                    }
+                                    lastTime = currentTime
+                                }
+                            }
+                            Thread.sleep(100)
+                            postUI {
+                                onSuccess()
+                            }
+                        } catch (e: Exception) {
+                            postUI {
+                                onError()
+                            }
+                        } finally {
+                            fos.close()
+                            bis.close()
+                            `is`.close()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

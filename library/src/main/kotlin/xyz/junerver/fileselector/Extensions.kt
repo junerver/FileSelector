@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -13,13 +14,24 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DecodeFormat
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import java.io.File
 import java.util.regex.Pattern
 
@@ -208,6 +220,23 @@ fun Context.openFile(uri: Uri) {
     }
 }
 
+fun Context.getDrawableRes(@DrawableRes id: Int): Drawable {
+    return  AppCompatResources.getDrawable(this, id)!!
+}
+
+fun Context.getColorRes(@ColorRes id: Int): Int {
+    return ContextCompat.getColor(this, id)
+}
+
+fun Context.inflater(resource: Int): View {
+    return LayoutInflater.from(this).inflate(resource, null)
+}
+
+
+fun Context.inflater(resource: Int, root: ViewGroup, attachToRoot: Boolean): View {
+    return LayoutInflater.from(this).inflate(resource, root, attachToRoot)
+}
+
 //打开document文件
 fun AppCompatActivity.openDocumentUri(uri: Uri) {
     try {
@@ -216,7 +245,7 @@ fun AppCompatActivity.openDocumentUri(uri: Uri) {
         intent.addCategory(Intent.CATEGORY_OPENABLE)//必须
         intent.type = "*/*"//必须
         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
-        this.startActivityForResult(intent,777)
+        this.startActivityForResult(intent, 777)
         Intent.createChooser(intent, "请选择对应的软件打开该附件！")
     } catch (e: ActivityNotFoundException) {
         Toast.makeText(this, "sorry附件不能打开，请下载相关软件！", Toast.LENGTH_SHORT).show()
@@ -252,4 +281,20 @@ fun String.isValidFileName(): Boolean {
     val regex =
         "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
     return Pattern.matches(regex, this)
+}
+
+fun ImageView.load(any: Any?, isGif: Boolean = false) {
+
+    val option = RequestOptions()
+    option.apply {
+//        centerCrop()
+//        format(if (!isGif) DecodeFormat.PREFER_RGB_565 else DecodeFormat.PREFER_ARGB_8888)
+//        dontAnimate()
+//        diskCacheStrategy(DiskCacheStrategy.ALL)
+        override(400, 400)
+    }
+    Glide.with(context)
+        .load(any)
+        .apply(option)
+        .into(this)
 }

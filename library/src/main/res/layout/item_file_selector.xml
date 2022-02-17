@@ -43,6 +43,14 @@
                 app:cpb_progressbar_color="#1bbc9b"
                 app:cpb_progressbar_width="5dp"
                 app:cpb_round_border="false" />
+            <ImageView
+                android:id="@+id/iv_data_flag"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginBottom="2dp"
+                android:layout_gravity="left|bottom"
+                android:src="@drawable/icon_dingding" />
         </FrameLayout>
 
         <LinearLayout
@@ -74,12 +82,5 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/iv_data_flag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:visibility="gone"
-        android:src="@drawable/ic_data_flag" />
+
 </RelativeLayout>

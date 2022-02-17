@@ -11,8 +11,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Bitmap
 import android.net.Uri
 
-import android.os.ParcelFileDescriptor
-import xyz.junerver.fileselector.FileUriUtils
+import xyz.junerver.fileselector.utils.FileUriUtils
 import xyz.junerver.fileselector.log
 import xyz.junerver.fileselector.worker.ANDROID_DATA_PATH
 import java.io.FileDescriptor
@@ -29,7 +28,7 @@ class PictureActivity : AppCompatActivity() {
         p?.let {
             if (it.path.startsWith(ANDROID_DATA_PATH)) {
                 it.isAndroidData = true
-                it.documentFile = FileUriUtils.getDoucmentFile(this,it.path)
+                it.documentFile = FileUriUtils.getDocumentFile(this,it.path)
             }
             if (!it.isAndroidData) {
                 photoView.setImageURI(getUriForFile(File(it.path)))

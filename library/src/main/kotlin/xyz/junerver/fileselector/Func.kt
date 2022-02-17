@@ -88,3 +88,7 @@ fun formatFileSize(size: Long): String {
     }
     return fileSizeString
 }
+
+fun getFileParentPath(path: String): String {
+    return path.substring(0,path.lastIndexOf("/"))
+}

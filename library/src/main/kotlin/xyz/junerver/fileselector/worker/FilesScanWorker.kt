@@ -8,6 +8,8 @@ import android.content.Context
 import android.net.Uri
 
 import androidx.documentfile.provider.DocumentFile
+import xyz.junerver.fileselector.utils.FileUriUtils
+import xyz.junerver.fileselector.utils.GlobalThreadPools
 import java.lang.ref.SoftReference
 import java.net.URLDecoder
 
@@ -52,11 +54,11 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                         mSrCtx.get()!!,
                         Uri.parse(FileUriUtils.changeToUri3(path))
                     )?.let {
-                        GlobalThreadPools.getInstance().execute { getDataFolderFiles(it) }
+                        GlobalThreadPools.instance?.execute { getDataFolderFiles(it) }
                     }
                 } else {
                     //非data目录普通遍历
-                    GlobalThreadPools.getInstance().execute { getFolderFiles(selectPath) }
+                    GlobalThreadPools.instance?.execute { getFolderFiles(selectPath) }
 //                    GlobalThreadPools.getInstance().execute { getFolderFilesByKt(selectPath) }
                 }
             }
@@ -65,7 +67,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
         }
         try {
             Thread.sleep(100)
-            while (!GlobalThreadPools.getInstance().hasDone()) {
+            while (!(GlobalThreadPools.instance?.hasDone() ?: run { true })) {
                 Thread.sleep(20)
             }
         } catch (e: InterruptedException) {
@@ -142,11 +144,11 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 if (FileSelector.ignorePaths.isNotEmpty()) {
                     for (ignorePath in FileSelector.ignorePaths) {
                         if (!dirPath.lowercase().contains(ignorePath.lowercase())) {
-                            GlobalThreadPools.getInstance().execute { getFolderFiles(dirPath) }
+                            GlobalThreadPools.instance?.execute { getFolderFiles(dirPath) }
                         }
                     }
                 } else {
-                    GlobalThreadPools.getInstance().execute { getFolderFiles(dirPath) }
+                    GlobalThreadPools.instance?.execute { getFolderFiles(dirPath) }
                 }
             }
         }
@@ -221,7 +223,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     //只遍历允许遍历的文件夹
                     if (path in INCLUDE_PACKAGE_DIR_LEVEL) {
                         INCLUDE_PACKAGE_DIR_LEVEL.remove(path)
-                        GlobalThreadPools.getInstance().execute { getDataFolderFiles(file) }
+                        GlobalThreadPools.instance?.execute { getDataFolderFiles(file) }
                     }
                 }
             }
@@ -261,26 +263,26 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
         private val mFilesIndexMap = HashMap<String, List<FileModel>>()
         val INCLUDE_PACKAGE_DIR_LEVEL = arrayListOf(
             //QQ文件目录层级
-            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent/QQfile_recv"),
+            FileUriUtils.changeToUri2(FileSelector.TARGET_DIR_PATH_QQ),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq"),
             //微信目录层级
-            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg/Download"),
+            FileUriUtils.changeToUri2(FileSelector.TARGET_DIR_PATH_WECHAT),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm"),
             //迅雷目录层级
-            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files/ThunderDownload"),
+            FileUriUtils.changeToUri2(FileSelector.TARGET_DIR_PATH_THUNDER),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files"),
             FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider"),
         )
 
         val TARGET_DIR_PATH = arrayListOf(
             //QQ文件目录层级
-            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mobileqq/Tencent/QQfile_recv"),
+            FileUriUtils.changeToUri2(FileSelector.TARGET_DIR_PATH_QQ),
             //微信目录层级
-            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.tencent.mm/MicroMsg/Download"),
+            FileUriUtils.changeToUri2(FileSelector.TARGET_DIR_PATH_WECHAT),
             //迅雷目录层级
-            FileUriUtils.changeToUri2("$ANDROID_DATA_PATH/com.xunlei.downloadprovider/files/ThunderDownload"),
+            FileUriUtils.changeToUri2(FileSelector.TARGET_DIR_PATH_THUNDER),
         )
     }
 
