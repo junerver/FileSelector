@@ -25,7 +25,7 @@ class RequestPermissionsActivity:AppCompatActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-        PermissionsUtils.getInstance()
+        PermissionsUtils
             .checkPermissions(this, permissions, object : PermissionsUtils.PermissionsResult {
                 override fun passPermission() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
@@ -77,7 +77,7 @@ class RequestPermissionsActivity:AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        PermissionsUtils.getInstance()
+        PermissionsUtils
             .onRequestPermissionsResult(this, requestCode, permissions, grantResults)
     }
 

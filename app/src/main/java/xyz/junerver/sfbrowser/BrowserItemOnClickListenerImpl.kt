@@ -21,7 +21,7 @@ import java.nio.file.Files
  * Email: junerver@gmail.com
  * Version: v1.0
  */
-class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileModelItemCallBack) :
+class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
     FileAdapter.BrowserItemOnClickListener {
 
     override fun onItemClick(ctx: Context, holder: FileAdapter.ViewHolder, fileModel: FileModel) {
@@ -114,7 +114,7 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                                 .setNeutralButton("取消") { _, _ -> }
                                 .setPositiveButton("确定") { _, _ ->
                                     delAct.invoke()
-                                    mCallBack.delItem(fileModel)
+                                    m.delItem(fileModel)
                                     ctx.toast("删除成功！")
                                 }.show()
                         }
@@ -149,7 +149,7 @@ class BrowserItemOnClickOnClickListenerImpl(private val mCallBack: OperateFileMo
                                 val newName = text + ".${fileModel.extension}"
                                 if (newName.isValidFileName()) {
                                     rename(newName)
-                                    mCallBack.changeItem(fileModel)
+                                    m.changeItem(fileModel)
                                 } else {
                                     ctx.toast("文件名非法！")
                                 }

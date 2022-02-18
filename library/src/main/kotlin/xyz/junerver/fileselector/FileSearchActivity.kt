@@ -3,8 +3,6 @@ package xyz.junerver.fileselector
 import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -30,7 +28,7 @@ const val EXTRA_IS_SELECTOR_MODE = "isSelectorMode"
  * @author Junerver
  * @Email: junerver@gmail.com
  */
-open class FileSearchActivity : AppCompatActivity(), OperateFileModelItemCallBack {
+open class FileSearchActivity : AppCompatActivity(), OperateFileModelItem {
 
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView

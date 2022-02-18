@@ -26,19 +26,87 @@ const val ANDROID_DATA_PATH: String = "/storage/emulated/0/Android/data"
 
 class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
 
+    //遍历到文件后执行的回调函数
     private var mCallBack: FilesScanCallBack? = null
 
-
+    /**
+    * Description: 回调接口
+    * @author Junerver
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
     interface FilesScanCallBack {
+        /**
+         * Description: 每遍历一个文件夹便调用一次[onNext]，传递文件夹中的文件列表
+         * @author Junerver
+         * @Email: junerver@gmail.com
+         * @Version: v1.0
+         * @param fileModels 文件列表
+         */
         fun onNext(fileModels: List<FileModel>)
+        /**
+         * Description: 全部遍历完毕，调用[onCompleted]返回全盘文件列表
+         * @author Junerver
+         * @Email: junerver@gmail.com
+         * @Version: v1.0
+         * @param fileModels 文件列表
+         */
         fun onCompleted(fileModels: List<FileModel>)
     }
 
+    //dsl扩展
+    class FilesScanCallBackDsl : FilesScanCallBack {
+        private var onNext: ((fileModels: List<FileModel>) -> Unit)? = null
+        private var onCompleted: ((fileModels: List<FileModel>) -> Unit)? = null
+
+        fun onNext(method: (fileModels: List<FileModel>) -> Unit) {
+            onNext = method
+        }
+
+        fun onCompleted(method: (fileModels: List<FileModel>) -> Unit) {
+            onCompleted = method
+        }
+
+        override fun onNext(fileModels: List<FileModel>) {
+            onNext?.invoke(fileModels)
+        }
+
+        override fun onCompleted(fileModels: List<FileModel>) {
+            onCompleted?.invoke(fileModels)
+        }
+    }
+
+    /**
+     * Description: 普通的设置回调方式
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     fun setCallBack(callBack: FilesScanCallBack): FilesScanWorker {
         mCallBack = callBack
         return this
     }
 
+    /**
+     * Description: 方便kt用户使用的DSL函数式回调
+     * @author Junerver
+     * @date: 2022/2/18-8:44
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param   onNext
+     * @param onCompleted
+     * @return
+     */
+    fun setCallBack(callBack: FilesScanCallBackDsl.() -> Unit): FilesScanWorker {
+        val dsl = FilesScanCallBackDsl()
+        dsl.callBack()
+        this.setCallBack(dsl)
+        return this
+    }
 
     private fun getFiles(): List<FileModel?> {
         if (FileSelector.selectPaths.isNotEmpty()) {

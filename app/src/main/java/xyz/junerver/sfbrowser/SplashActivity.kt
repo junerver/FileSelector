@@ -21,8 +21,10 @@ class SplashActivity : AppCompatActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-        PermissionsUtils.getInstance()
-            .checkPermissions(this, permissions, object : PermissionsUtils.PermissionsResult {
+        PermissionsUtils.checkPermissions(
+            this,
+            permissions,
+            object : PermissionsUtils.PermissionsResult {
                 override fun passPermission() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
                         "没有文件管理权限去申请".log()
@@ -73,7 +75,7 @@ class SplashActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        PermissionsUtils.getInstance()
+        PermissionsUtils
             .onRequestPermissionsResult(this, requestCode, permissions, grantResults)
     }
 
@@ -107,8 +109,11 @@ class SplashActivity : AppCompatActivity() {
         } else if (requestCode == REQUEST_CODE_ANDROID_DATA) {
             //关键是这里，这个就是保存这个目录的访问权限
             data?.let {
-                it.data?.let {uri->
-                    contentResolver.takePersistableUriPermission(uri, data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION))
+                it.data?.let { uri ->
+                    contentResolver.takePersistableUriPermission(
+                        uri,
+                        data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    )
                 }
             }
             val grant = FileUriUtils.isGrant(this)

@@ -43,13 +43,14 @@ const val REQUEST_CODE_MANAGE_APP_ALL_FILES = 998
 
 //请求查找文件
 const val REQUEST_CODE_SEARCH_FILES = 998
+
 /**
-* Description: 文件选择器界面
-* @author Junerver
-* @Email: junerver@gmail.com
-* @Version: v1.0
-*/
-open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallBack {
+ * Description: 文件选择器界面
+ * @author Junerver
+ * @Email: junerver@gmail.com
+ * @Version: v1.0
+ */
+open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: FastScrollRecyclerView
     private lateinit var empty: TextView
@@ -87,7 +88,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-        PermissionsUtils.getInstance()
+        PermissionsUtils
             .checkPermissions(this, permissions, object : PermissionsResult {
                 override fun passPermission() {
                     progressBar.visible()
@@ -119,6 +120,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
             })
     }
 
+    //初始化toolbar
     protected open fun initToolBar(title: String = "文件选择") {
         mToolBar = findViewById<Toolbar>(R.id.toolbar)
         window.statusBarColor = FileSelector.barColor
@@ -130,6 +132,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
         mToolBar.setNavigationOnClickListener { onBackPressed() }
     }
 
+    //初始化adapter
     protected open fun initAdapter() {
         mFileAdapter = FileAdapter(this, R.layout.item_file_selector, mFileModels, isSelectorMode)
         mFileAdapter.setSelectedFileList(mSelectedFileList)
@@ -140,6 +143,14 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
         }
     }
 
+    /**
+     * Description: 跳转搜索页面，该页面必须是 [FileSearchActivity] 的子类
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     protected open fun openSearchUI(clazz: KClass<out FileSearchActivity> = FileSearchActivity::class) {
         val i = Intent(this, clazz.java)
         //还能选多少
@@ -148,13 +159,21 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
         startActivityForResult(i, REQUEST_CODE_SEARCH_FILES)
     }
 
+    /**
+     * Description: 开始搜索文件
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     private fun getFiles() {
         mFileModels.clear()
         updateMenuUI()
         val start = System.currentTimeMillis()
         FilesScanWorker(SoftReference(mContext))
-            .setCallBack(object : FilesScanWorker.FilesScanCallBack {
-                override fun onNext(fileModels: List<FileModel>) {
+            .setCallBack {
+                onNext { fileModels ->
                     sortFileList(mCurrentSortType, fileModels as ArrayList<FileModel>)
                     val lastIndex = mFileModels.size
                     if (!fileModels[0].isAndroidData) {
@@ -164,31 +183,19 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
                         mFileModels.addAll(0, fileModels)
                         mFileAdapter.notifyItemRangeInserted(0, fileModels.size)
                     }
-
-                    if (mFileModels.isEmpty()) {
-                        empty.visible()
-                        recyclerView.gone()
-                    } else {
-                        empty.gone()
-                        recyclerView.visible()
-                    }
+                    empty.visibleOrGone(mFileModels.isEmpty())
+                    recyclerView.visibleOrGone(mFileModels.isNotEmpty())
                     progressBar.gone()
                 }
-
-                override fun onCompleted(fileModels: List<FileModel>) {
-                    if (mFileModels.isEmpty()) {
-                        empty.visible()
-                        recyclerView.gone()
-
-                    } else {
-                        empty.gone()
-                        recyclerView.visible()
-                    }
+                onCompleted { fileModels ->
+                    empty.visibleOrGone(mFileModels.isEmpty())
+                    recyclerView.visibleOrGone(mFileModels.isNotEmpty())
                     progressBar.gone()
                     val end = System.currentTimeMillis()
                     "scan completed，total：${fileModels.size}  All time consumed: ${end - start}ms ".log()
                 }
-            }).work()
+            }
+            .work()
     }
 
     override fun delItem(fileModel: FileModel) {
@@ -383,7 +390,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItemCallB
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        PermissionsUtils.getInstance()
+        PermissionsUtils
             .onRequestPermissionsResult(this, requestCode, permissions, grantResults)
     }
 }

@@ -12,6 +12,6 @@ import xyz.junerver.fileselector.FileSearchActivity
 class OpenSearchActivity : FileSearchActivity() {
     override fun initAdapter() {
         super.initAdapter()
-        mFileAdapter.setListener(BrowserItemOnClickOnClickListenerImpl(this))
+        mFileAdapter.setListener(BrowserItemOnClickListenerImpl(this))
     }
 }

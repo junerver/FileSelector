@@ -1,18 +1,8 @@
 package xyz.junerver.sfbrowser
 
-import android.app.Activity
-import android.content.Intent
-import androidx.appcompat.app.AlertDialog
 import xyz.junerver.fileselector.*
 import java.io.File
 import kotlin.reflect.KClass
-
-import com.lxj.xpopup.XPopup
-import java.nio.file.Files
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.net.Uri
 
 
 class MainActivity : FileSelectorActivity() {
@@ -43,7 +33,7 @@ class MainActivity : FileSelectorActivity() {
 
     override fun initAdapter() {
         super.initAdapter()
-        mFileAdapter.setListener(BrowserItemOnClickOnClickListenerImpl(this))
+        mFileAdapter.setListener(BrowserItemOnClickListenerImpl(this))
     }
 
     override fun openSearchUI(clazz: KClass<out FileSearchActivity>) {
