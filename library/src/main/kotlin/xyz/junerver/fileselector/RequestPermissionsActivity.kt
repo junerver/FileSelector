@@ -15,7 +15,8 @@ import xyz.junerver.fileselector.utils.FileUriUtils
  * Version: v1.0
  */
 const val REQUEST_CODE_ANDROID_DATA = 888
-class RequestPermissionsActivity:AppCompatActivity() {
+
+class RequestPermissionsActivity : AppCompatActivity() {
 
     @SuppressLint("MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,50 +26,47 @@ class RequestPermissionsActivity:AppCompatActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-        PermissionsUtils
-            .checkPermissions(this, permissions, object : PermissionsUtils.PermissionsResult {
-                override fun passPermission() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-                        "没有文件管理权限去申请".log()
-                        showManagerFileTips(
-                            cancel = { delayStart() },
+        PermissionsUtils.checkPermissions(this, permissions) {
+            passPermission {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                    "没有文件管理权限去申请".log()
+                    showManagerFileTips(
+                        cancel = { delayStart() },
+                        request = {
+                            //请求文件管理权限
+                            startActivityForResult(
+                                it,
+                                REQUEST_CODE_MANAGE_APP_ALL_FILES
+                            )
+                        }
+                    )
+                } else {
+                    //获取权限成功
+                    val grant = FileUriUtils.isGrant(context)
+                    "是否获得data权限: $grant".log()
+                    if (!grant) {
+                        //请求data权限
+                        showRequestDataTips(
+                            cancel = {
+                                toast("未获得Android/data目录权限，无法浏览该目录下文件！")
+                                delayStart()
+                            },
                             request = {
-                                //请求文件管理权限
-                                startActivityForResult(
-                                    it,
-                                    REQUEST_CODE_MANAGE_APP_ALL_FILES
-                                )
+                                FileUriUtils.startForRoot(context, REQUEST_CODE_ANDROID_DATA)
                             }
                         )
                     } else {
-                        //获取权限成功
-                        val grant = FileUriUtils.isGrant(context)
-                        "是否获得data权限: $grant".log()
-                        if (!grant) {
-                            //请求data权限
-                            showRequestDataTips(
-                                cancel = {
-                                    toast("未获得Android/data目录权限，无法浏览该目录下文件！")
-                                    delayStart()
-                                },
-                                request = {
-                                    FileUriUtils.startForRoot(context, REQUEST_CODE_ANDROID_DATA)
-                                }
-                            )
-                        } else {
-                            delayStart()
-                        }
+                        delayStart()
                     }
                 }
-
-                override fun continuePermission() {
-                    toast("读写权限被拒绝")
-                }
-
-                override fun refusePermission() {
-                    toast("读写权限被拒绝")
-                }
-            })
+            }
+            continuePermission {
+                toast("读写权限被拒绝")
+            }
+            refusePermission {
+                toast("读写权限被拒绝")
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -111,8 +109,11 @@ class RequestPermissionsActivity:AppCompatActivity() {
         } else if (requestCode == REQUEST_CODE_ANDROID_DATA) {
             //关键是这里，这个就是保存这个目录的访问权限
             data?.let {
-                it.data?.let {uri->
-                    contentResolver.takePersistableUriPermission(uri, data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION))
+                it.data?.let { uri ->
+                    contentResolver.takePersistableUriPermission(
+                        uri,
+                        data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    )
                 }
             }
             val grant = FileUriUtils.isGrant(this)
@@ -126,9 +127,9 @@ class RequestPermissionsActivity:AppCompatActivity() {
     }
 
     fun delayStart() {
-       postUI {
-           startActivity(Intent(this, FileSelectorActivity::class.java))
-           finish()
-       }
+        postUI {
+            startActivity(Intent(this, FileSelectorActivity::class.java))
+            finish()
+        }
     }
 }

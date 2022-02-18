@@ -23,50 +23,48 @@ class SplashActivity : AppCompatActivity() {
         )
         PermissionsUtils.checkPermissions(
             this,
-            permissions,
-            object : PermissionsUtils.PermissionsResult {
-                override fun passPermission() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-                        "没有文件管理权限去申请".log()
-                        showManagerFileTips(
-                            cancel = { delayStart() },
+            permissions
+        ) {
+            passPermission {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                    "没有文件管理权限去申请".log()
+                    showManagerFileTips(
+                        cancel = { delayStart() },
+                        request = {
+                            //请求文件管理权限
+                            startActivityForResult(
+                                it,
+                                REQUEST_CODE_MANAGE_APP_ALL_FILES
+                            )
+                        }
+                    )
+                } else {
+                    //获取权限成功
+                    val grant = FileUriUtils.isGrant(context)
+                    "是否获得data权限: $grant".log()
+                    if (!grant) {
+                        //请求data权限
+                        showRequestDataTips(
+                            cancel = {
+                                toast("未获得Android/data目录权限，无法浏览该目录下文件！")
+                                delayStart()
+                            },
                             request = {
-                                //请求文件管理权限
-                                startActivityForResult(
-                                    it,
-                                    REQUEST_CODE_MANAGE_APP_ALL_FILES
-                                )
+                                FileUriUtils.startForRoot(context, REQUEST_CODE_ANDROID_DATA)
                             }
                         )
                     } else {
-                        //获取权限成功
-                        val grant = FileUriUtils.isGrant(context)
-                        "是否获得data权限: $grant".log()
-                        if (!grant) {
-                            //请求data权限
-                            showRequestDataTips(
-                                cancel = {
-                                    toast("未获得Android/data目录权限，无法浏览该目录下文件！")
-                                    delayStart()
-                                },
-                                request = {
-                                    FileUriUtils.startForRoot(context, REQUEST_CODE_ANDROID_DATA)
-                                }
-                            )
-                        } else {
-                            delayStart()
-                        }
+                        delayStart()
                     }
                 }
-
-                override fun continuePermission() {
-                    toast("读写权限被拒绝")
-                }
-
-                override fun refusePermission() {
-                    toast("读写权限被拒绝")
-                }
-            })
+            }
+            continuePermission {
+                toast("读写权限被拒绝")
+            }
+            refusePermission {
+                toast("读写权限被拒绝")
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(

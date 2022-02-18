@@ -21,7 +21,7 @@ import java.nio.file.Files
  * Email: junerver@gmail.com
  * Version: v1.0
  */
-class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
+class BrowserItemOnClickListenerImpl(private val operateFileModelItem: OperateFileModelItem) :
     FileAdapter.BrowserItemOnClickListener {
 
     override fun onItemClick(ctx: Context, holder: FileAdapter.ViewHolder, fileModel: FileModel) {
@@ -46,14 +46,17 @@ class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
                         progressMax = 100f
                         visibility = View.VISIBLE
                     }
-                    extractDocument(fileModel, ctx, target, {
-                        circularProgressBar.gone()
-                        ctx.openFile(target.path)
-                    }, {
-                        ctx.toast("文件打开失败！")
-                    },{
-                        circularProgressBar.setProgressWithAnimation(it, 100)
-                    })
+                    extractDocument(fileModel, ctx, target,
+                        onSuccess = {
+                            circularProgressBar.gone()
+                            ctx.openFile(target.path)
+                        },
+                        onError = {
+                            ctx.toast("文件打开失败！")
+                        },
+                        onProgressChange = {
+                            circularProgressBar.setProgressWithAnimation(it, 100)
+                        })
                 }
             }
             if (!fileModel.isAndroidData) {
@@ -97,14 +100,17 @@ class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
                                 progressMax = 100f
                                 visibility = View.VISIBLE
                             }
-                            extractDocument(fileModel, ctx, target, {
-                                circularProgressBar.gone()
-                                ctx.toast("文件提取成功：${target.path}")
-                            }, {
-                                ctx.toast("文件提取失败！")
-                            }, {
-                                circularProgressBar.setProgressWithAnimation(it, 100)
-                            })
+                            extractDocument(fileModel, ctx, target,
+                                onSuccess = {
+                                    circularProgressBar.gone()
+                                    ctx.toast("文件提取成功：${target.path}")
+                                },
+                                onError = {
+                                    ctx.toast("文件提取失败！")
+                                },
+                                onProgressChange = {
+                                    circularProgressBar.setProgressWithAnimation(it, 100)
+                                })
                         }
                     }
                     DELETE -> {
@@ -114,7 +120,7 @@ class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
                                 .setNeutralButton("取消") { _, _ -> }
                                 .setPositiveButton("确定") { _, _ ->
                                     delAct.invoke()
-                                    m.delItem(fileModel)
+                                    operateFileModelItem.delItem(fileModel)
                                     ctx.toast("删除成功！")
                                 }.show()
                         }
@@ -149,7 +155,7 @@ class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
                                 val newName = text + ".${fileModel.extension}"
                                 if (newName.isValidFileName()) {
                                     rename(newName)
-                                    m.changeItem(fileModel)
+                                    operateFileModelItem.changeItem(fileModel)
                                 } else {
                                     ctx.toast("文件名非法！")
                                 }
@@ -164,7 +170,7 @@ class BrowserItemOnClickListenerImpl(private val m: OperateFileModelItem) :
                         } else if (fileModel.isAndroidData && fileModel.documentFile != null) {
                             showRenamePopup {
                                 fileModel.documentFile!!.renameTo(it)
-                                fileModel.name = it
+                                fileModel.update(fileModel.documentFile!!)
                             }
                         } else {
                             ctx.toast("无效文件，操作失败！")

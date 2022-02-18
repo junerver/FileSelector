@@ -8,7 +8,14 @@ package xyz.junerver.fileselector
  * Version: v1.0
  */
 interface OperateFileModelItem {
-    //变更item数据
+    /**
+    * Description: 变更item数据，UI层做重命名等操作后应该调用该函数
+    * @author Junerver
+    * @Email: junerver@gmail.com
+    * @Version: v1.0
+    * @param
+    * @return
+    */
     fun changeItem(fileModel: FileModel)
     //移除item
     fun delItem(fileModel: FileModel)

@@ -88,36 +88,34 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-        PermissionsUtils
-            .checkPermissions(this, permissions, object : PermissionsResult {
-                override fun passPermission() {
-                    progressBar.visible()
-                    initAdapter()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
-                        //已有文件管理权限
-                        getFiles()
-                    } else {
-                        //没有文件管理权限去申请
-                        showManagerFileTips(
-                            cancel = { getFiles() },
-                            request = {
-                                startActivityForResult(
-                                    it,
-                                    REQUEST_CODE_MANAGE_APP_ALL_FILES
-                                )
-                            }
-                        )
-                    }
+        PermissionsUtils.checkPermissions(this, permissions) {
+            passPermission {
+                progressBar.visible()
+                initAdapter()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+                    //已有文件管理权限
+                    getFiles()
+                } else {
+                    //没有文件管理权限去申请
+                    showManagerFileTips(
+                        cancel = { getFiles() },
+                        request = {
+                            startActivityForResult(
+                                it,
+                                REQUEST_CODE_MANAGE_APP_ALL_FILES
+                            )
+                        }
+                    )
                 }
+            }
+            continuePermission {
+                Toast.makeText(this@FileSelectorActivity, "读写权限被拒绝", Toast.LENGTH_LONG).show()
+            }
+            refusePermission {
+                Toast.makeText(this@FileSelectorActivity, "读写权限被拒绝", Toast.LENGTH_LONG).show()
+            }
 
-                override fun continuePermission() {
-                    Toast.makeText(this@FileSelectorActivity, "读写权限被拒绝", Toast.LENGTH_LONG).show()
-                }
-
-                override fun refusePermission() {
-                    Toast.makeText(this@FileSelectorActivity, "读写权限被拒绝", Toast.LENGTH_LONG).show()
-                }
-            })
+        }
     }
 
     //初始化toolbar

@@ -17,6 +17,14 @@ object PermissionsUtils {
     private const val mRequestCode = 100
     private var mPermissionsResult: PermissionsResult? = null
 
+    /**
+     * Description: 保留给Java使用者
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     * @param
+     * @return
+     */
     fun checkPermissions(
         activity: Activity,
         permissions: Array<String>,
@@ -38,10 +46,27 @@ object PermissionsUtils {
             }
         }
         if (mPermissionList.size > 0) {
-            ActivityCompat.requestPermissions(activity!!, permissions, mRequestCode)
+            ActivityCompat.requestPermissions(activity, permissions, mRequestCode)
         } else {
             result.passPermission()
         }
+    }
+
+    /**
+     * Description: dsl扩展
+     * @author Junerver
+     * @date: 2022/2/18-10:09
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     */
+    fun checkPermissions(
+        activity: Activity,
+        permissions: Array<String>,
+        result: PermissionsResultDsl.() -> Unit
+    ) {
+        val dsl = PermissionsResultDsl()
+        dsl.result()
+        checkPermissions(activity, permissions, dsl)
     }
 
     fun onRequestPermissionsResult(
@@ -66,12 +91,16 @@ object PermissionsUtils {
                     }
                 }
             }
-            if (hasPermissionDenied) {
-                mPermissionsResult!!.continuePermission()
-            } else if (notRemindAgain) {
-                mPermissionsResult!!.refusePermission()
-            } else {
-                mPermissionsResult!!.passPermission()
+            when {
+                hasPermissionDenied -> {
+                    mPermissionsResult!!.continuePermission()
+                }
+                notRemindAgain -> {
+                    mPermissionsResult!!.refusePermission()
+                }
+                else -> {
+                    mPermissionsResult!!.passPermission()
+                }
             }
         }
     }
@@ -91,5 +120,36 @@ object PermissionsUtils {
          * 权限拒绝且不再提醒
          */
         fun refusePermission()
+    }
+
+    class PermissionsResultDsl : PermissionsResult {
+        private var passPermission: (() -> Unit)? = null
+        private var continuePermission: (() -> Unit)? = null
+        private var refusePermission: (() -> Unit)? = null
+
+        fun passPermission(method: () -> Unit) {
+            passPermission = method
+        }
+
+        fun continuePermission(method: () -> Unit) {
+            continuePermission = method
+        }
+
+        fun refusePermission(method: () -> Unit) {
+            refusePermission = method
+        }
+
+        override fun passPermission() {
+            passPermission?.invoke()
+        }
+
+        override fun continuePermission() {
+            continuePermission?.invoke()
+        }
+
+        override fun refusePermission() {
+            refusePermission?.invoke()
+        }
+
     }
 }

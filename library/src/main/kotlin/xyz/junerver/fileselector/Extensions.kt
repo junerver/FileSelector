@@ -32,7 +32,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import xyz.junerver.fileselector.utils.FileUriUtils
 import java.io.File
+import java.net.URLDecoder
 import java.util.regex.Pattern
 
 
@@ -62,7 +64,7 @@ fun View.visible() {
     this.visibility = View.VISIBLE
 }
 
-fun View.visibleOrGone(visible:Boolean) {
+fun View.visibleOrGone(visible: Boolean) {
     this.visibility = if (visible) View.VISIBLE else View.GONE
 }
 
@@ -225,7 +227,7 @@ fun Context.openFile(uri: Uri) {
 }
 
 fun Context.getDrawableRes(@DrawableRes id: Int): Drawable {
-    return  AppCompatResources.getDrawable(this, id)!!
+    return AppCompatResources.getDrawable(this, id)!!
 }
 
 fun Context.getColorRes(@ColorRes id: Int): Int {
@@ -286,6 +288,8 @@ fun String.isValidFileName(): Boolean {
         "[^\\s\\\\/:\\*\\?\\\"<>\\|](\\x20|[^\\s\\\\/:\\*\\?\\\"<>\\|])*[^\\s\\\\/:\\*\\?\\\"<>\\|\\.]$"
     return Pattern.matches(regex, this)
 }
+
+fun String.decodeURL(): String = URLDecoder.decode(this, "UTF-8")
 
 fun ImageView.load(any: Any?, isGif: Boolean = false) {
 

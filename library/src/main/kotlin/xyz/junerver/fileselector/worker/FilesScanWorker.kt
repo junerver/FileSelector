@@ -30,13 +30,11 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
     private var mCallBack: FilesScanCallBack? = null
 
     /**
-    * Description: 回调接口
-    * @author Junerver
-    * @Email: junerver@gmail.com
-    * @Version: v1.0
-    * @param
-    * @return
-    */
+     * Description: 回调接口
+     * @author Junerver
+     * @Email: junerver@gmail.com
+     * @Version: v1.0
+     */
     interface FilesScanCallBack {
         /**
          * Description: 每遍历一个文件夹便调用一次[onNext]，传递文件夹中的文件列表
@@ -46,6 +44,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
          * @param fileModels 文件列表
          */
         fun onNext(fileModels: List<FileModel>)
+
         /**
          * Description: 全部遍历完毕，调用[onCompleted]返回全盘文件列表
          * @author Junerver
@@ -152,7 +151,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
     }
 
     /**
-     * Description: 普通文件的遍历方式
+     * Description: 普通文件的遍历方式 该方式5000+文件，耗时5600ms左右
      * @author Junerver
      * @date: 2021/12/30-16:50
      * @Email: junerver@gmail.com
@@ -273,10 +272,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     //文件
                     if (getExtensionByName(file.name.toString()).lowercase() in FileSelector.mFileTypes) {
                         val fileModel = FileModel(
-                            URLDecoder.decode(
-                                FileUriUtils.treeToPath(file.uri.toString()),
-                                "UTF-8"
-                            ),
+                            FileUriUtils.treeToPath(file.uri.toString()).decodeURL(),
                             file.name.toString(),
                             getExtensionByName(file.name.toString()),
                             file.length(),
