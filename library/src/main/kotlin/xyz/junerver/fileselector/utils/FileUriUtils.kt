@@ -21,22 +21,6 @@ import android.provider.DocumentsContract
 object FileUriUtils {
     private val root = Environment.getExternalStorageDirectory().path + "/"
 
-    //将uri转换成真实路径
-    fun treeToPath(path: String): String {
-        var path2: String
-        if (path.contains("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary")) {
-            path2 = path.replace(
-                "content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary%3A",
-                root
-            )
-            path2 = path2.replace("%2F", "/")
-        } else {
-//            path2 = root + TextUtils.getSubString(path + "测试", "document/primary%3A", "测试").replace("%2F", "/");
-            path2 = root
-        }
-        return path2
-    }
-
     //判断是否已经获取了Data权限，改改逻辑就能判断其他目录，懂得都懂
     fun isGrant(context: Context): Boolean {
         for (persistedUriPermission in context.contentResolver.persistedUriPermissions) {
@@ -45,6 +29,18 @@ object FileUriUtils {
             }
         }
         return false
+    }
+
+    //将uri转换成真实路径
+    fun treeToPath(path: String): String {
+        return if (path.contains("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary")) {
+            path.replace(
+                "content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary%3A",
+                root
+            ).replace("%2F", "/")
+        } else {
+            root
+        }
     }
 
     //直接返回DocumentFile
@@ -57,7 +53,7 @@ object FileUriUtils {
         return document
     }
 
-    //转换至uriTree的路径
+    //将真实路径转换至uriTree的路径
     fun changeToUri(path: String): String {
         var path = path
         if (path.endsWith("/")) {
@@ -142,15 +138,17 @@ object FileUriUtils {
 
     //直接获取data权限，推荐使用这种方案
     fun startForRoot(context: Activity, REQUEST_CODE_FOR_DIR: Int) {
-        val uri1 =
+        val dataUri =
             Uri.parse("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata")
-        var uri = changeToUri(Environment.getExternalStorageDirectory().path)
-        uri = uri + "/document/primary%3A" + Environment.getExternalStorageDirectory().path.replace(
-            "/storage/emulated/0/",
-            ""
-        ).replace("/", "%2F")
-        val parse = Uri.parse(uri)
-        val documentFile = DocumentFile.fromTreeUri(context, uri1)
+        //根目录
+        var rootUri = changeToUri(Environment.getExternalStorageDirectory().path)
+        rootUri =
+            "$rootUri/document/primary%3A" + Environment.getExternalStorageDirectory().path.replace(
+                "/storage/emulated/0/",
+                ""
+            ).replace("/", "%2F")
+        val parse = Uri.parse(rootUri)
+        val documentFile = DocumentFile.fromTreeUri(context, dataUri)
         val intent1 = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent1.flags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 or Intent.FLAG_GRANT_WRITE_URI_PERMISSION

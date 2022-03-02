@@ -89,12 +89,12 @@ open class FileSearchActivity : AppCompatActivity(), OperateFileModelItem {
                 afterTextChanged {
                     it?.toString()?.let {
                         mResult.clear()
-                        mResult.addAll(FilesScanWorker.mFileModelSet.toList().filter { fm ->
+                        mResult += FilesScanWorker.mFileModelSet.toList().filter { fm ->
                             val similarity = ro.similarity(it, fm.name)
                             fm.similarity = similarity
                             //避免复杂逻辑，只筛选未选中的文件
                             similarity > CONFIDENCE_LEVEL && !fm.isSelected
-                        })
+                        }
                         mResult.sortByDescending { r -> r.similarity }
                         mFileAdapter.notifyDataSetChanged()
                     }

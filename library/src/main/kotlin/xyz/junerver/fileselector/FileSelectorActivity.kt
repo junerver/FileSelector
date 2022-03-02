@@ -175,7 +175,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
                     sortFileList(mCurrentSortType, fileModels as ArrayList<FileModel>)
                     val lastIndex = mFileModels.size
                     if (!fileModels[0].isAndroidData) {
-                        mFileModels.addAll(fileModels)
+                        mFileModels += fileModels
                         mFileAdapter.notifyItemRangeInserted(lastIndex, fileModels.size)
                     } else {
                         mFileModels.addAll(0, fileModels)
@@ -360,7 +360,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_SEARCH_FILES) {
             mSelectedFileList.clear()
-            mSelectedFileList.addAll(mFileModels.filter { it.isSelected })
+            mSelectedFileList += mFileModels.filter { it.isSelected }
             mFileAdapter.notifyDataSetChanged()
             updateMenuUI()
         }

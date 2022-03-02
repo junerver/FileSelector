@@ -3,6 +3,7 @@ package xyz.junerver.fileselector
 import android.net.Uri
 import android.os.Parcelable
 import androidx.documentfile.provider.DocumentFile
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import xyz.junerver.fileselector.utils.FileUriUtils
 import java.io.File
@@ -16,15 +17,24 @@ data class FileModel(
     var date: Long,
 ) : Parcelable {
     //是不是data文件
+    @IgnoredOnParcel
     var isAndroidData = false
+
+    @IgnoredOnParcel
     var uri: Uri? = null
+
+    @IgnoredOnParcel
     var documentFile: DocumentFile? = null
         set(value) {
             field = value
             this.uri = value?.uri
             this.isAndroidData = true
         }
+
+    @IgnoredOnParcel
     var isSelected = false
+
+    @IgnoredOnParcel
     var similarity: Double = 0.0
 
     //根据文件修改模型

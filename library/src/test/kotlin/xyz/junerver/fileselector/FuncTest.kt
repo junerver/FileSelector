@@ -18,9 +18,21 @@ class FuncTest {
 
     @Test
     fun testFuncGetParent() {
-        val path = "xxxx/xxxx/xxxx/abc.jpg"
-        println(getFileParentPath(path))
-        val map = mapOf("1" to 1, "2" to 2)
-        println(map["3"])
+        val path = String("xxxx/xxxx/xxxx/abc.jpg".toByteArray())
+        val path2 = String("xxxx/xxxx/xxxx/abc.jpg".toByteArray())
+        //‘==‘表示比较值，‘===‘表示比较两个对象的地址是否相等
+        println(path == path2)
+        println(path === path2)
+        val list = mutableListOf("1", "2")
+        list += "3"
+        println(list)
+//        println(getFileParentPath(path))
+//        val map = mapOf("1" to 1, "2" to 2)
+//        println(map["3"])
+        println( 8 x 9)
+    }
+
+    private infix fun Int.x(a: Int): Int {
+        return this * a
     }
 }

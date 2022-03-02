@@ -42,7 +42,7 @@ object PermissionsUtils {
                     permission
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                mPermissionList.add(permission)
+                mPermissionList += permission
             }
         }
         if (mPermissionList.size > 0) {

@@ -188,13 +188,13 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     value.length(),
                     value.lastModified()
                 )
-                fms.add(fileModel)
+                fms += fileModel
             } else {
-                dirs.add(value)
+                dirs += value
             }
         }
         if (fms.isNotEmpty()) {
-            mFileModelSet.addAll(fms)
+            mFileModelSet += fms
             if (!mFilesIndexMap.containsKey(absPath)) {
                 mFilesIndexMap[absPath] = fms
                 mCallBack?.run {
@@ -245,7 +245,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                     it.length(),
                     it.lastModified()
                 )
-                mFileModelSet.add(fileModel)
+                mFileModelSet += fileModel
                 mCallBack?.run {
                     postUI {
                         onNext(arrayListOf(fileModel))
@@ -279,7 +279,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                             file.lastModified()
                         )
                         fileModel.documentFile = file
-                        fms.add(fileModel)
+                        fms += fileModel
                     }
                 } else {
                     //目录
@@ -292,7 +292,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
                 }
             }
             if (fms.isNotEmpty()) {
-                mFileModelSet.addAll(fms)
+                mFileModelSet += fms
                 if (!mFilesIndexMap.containsKey(documentFile.uri.path)) {
                     mFilesIndexMap[documentFile.uri.path.toString()] = fms
                     mCallBack?.run {

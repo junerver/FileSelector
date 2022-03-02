@@ -131,7 +131,7 @@ class FileAdapter(
                     mSelectedFileList?.remove(fileModel)
                     fileModel.isSelected = false
                 } else if (isChecked && !fileModel.isSelected) {
-                    if (mSelectedFileList!!.size >= mMaxSelect) {
+                    if (mSelectedFileList?.size?.let { it >= mMaxSelect } == true) {
                         Toast.makeText(
                             mContext,
                             "您最多只能选择" + FileSelector.maxCount.toString() + "个",
@@ -141,12 +141,14 @@ class FileAdapter(
                         return@OnCheckedChangeListener
                     }
                     "onCheckedChanged: ${fileModel.name}".log()
-                    mSelectedFileList!!.add(fileModel)
+                    mSelectedFileList?.also {
+                        it += fileModel
+                    }
                     fileModel.isSelected = true
                 }
                 mCountMenuItem?.title = String.format(
                     mContext.getString(R.string.selected_file_count),
-                    mSelectedFileList!!.size.toString(),
+                    mSelectedFileList?.size ?: "0",
                     java.lang.String.valueOf(FileSelector.maxCount)
                 )
             })
@@ -176,7 +178,7 @@ class FileAdapter(
                         mSelectedFileList?.remove(fileModel)
                         fileModel.isSelected = false
                     } else {
-                        if (mSelectedFileList!!.size >= mMaxSelect) {
+                        if (mSelectedFileList?.size?.let { size -> size >= mMaxSelect } == true) {
                             Toast.makeText(
                                 mContext,
                                 "您最多只能选择" + FileSelector.maxCount.toString() + "个",
@@ -184,13 +186,13 @@ class FileAdapter(
                             ).show()
                             return@setOnClickListener
                         }
-                        mSelectedFileList!!.add(fileModel)
+                        mSelectedFileList?.also { list -> list += fileModel }
                         fileModel.isSelected = true
                     }
                     checkBox.setChecked(fileModel.isSelected, true)
                     mCountMenuItem?.title = String.format(
                         mContext.getString(R.string.selected_file_count),
-                        mSelectedFileList!!.size.toString(),
+                        mSelectedFileList?.size ?: "0",
                         java.lang.String.valueOf(FileSelector.maxCount)
                     )
                 } else {
