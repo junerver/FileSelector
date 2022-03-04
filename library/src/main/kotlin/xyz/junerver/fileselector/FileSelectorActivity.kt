@@ -365,9 +365,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
             updateMenuUI()
         }
         if (requestCode == REQUEST_CODE_MANAGE_APP_ALL_FILES && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                toast("文件访问权限获取失败，部分文件可能无法展示！")
-            }
+            if (!Environment.isExternalStorageManager()) toast("文件访问权限获取失败，部分文件可能无法展示！")
             getFiles()
         }
     }
@@ -375,9 +373,7 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        if (ActivityUIWorker.listener != null) {
-            ActivityUIWorker.listener!!.onCancel()
-        }
+        ActivityUIWorker.listener?.onCancel()
         GlobalThreadPools.instance?.shutdownNow()
         finish()
     }
