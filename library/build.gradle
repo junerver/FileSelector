@@ -1,8 +1,7 @@
-import java.nio.file.Files
-
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion project.ext.compileSdkVersion
@@ -58,4 +57,38 @@ dependencies {
     implementation 'com.github.shichuanenhui:baseadapter:2.0.0'
 
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.1'
+}
+task generateSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            phone(MavenPublication) {
+                from components.release
+                groupId = 'xyz.junerver.fileselector'
+                artifactId = 'file-selector-phone'
+                version = '1.1'
+            }
+            pad(MavenPublication) {
+                from components.release
+                groupId = 'xyz.junerver.fileselector'
+                artifactId = 'file-selector-pad'
+                version = '1.1'
+            }
+        }
+        repositories {
+            maven {
+                allowInsecureProtocol = true
+                name = "nexus"
+                url = "http://10.10.6.33:8081/repository/maven-releases/"
+                credentials {
+                    username = 'junerver'
+                    password = 'NS064320'
+                }
+            }
+        }
+    }
 }
