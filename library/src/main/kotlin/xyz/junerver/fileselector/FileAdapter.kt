@@ -14,6 +14,7 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
 import xyz.junerver.fileselector.utils.AvatarUtils
 import xyz.junerver.fileselector.utils.CharacterParserUtils
+import xyz.junerver.fileselector.worker.DIND_TALK_PATH
 import java.util.ArrayList
 
 /**
@@ -167,7 +168,12 @@ class FileAdapter(
                     this.visible()
                 } ?: run { gone() }
             } else {
-                gone()
+                if (fileModel.path.contains(DIND_TALK_PATH)) {
+                    setImageDrawable(this.context.getDrawableRes(R.drawable.icon_dingding))
+                    this.visible()
+                } else {
+                    gone()
+                }
             }
         }
         val layout = holder.layout

@@ -23,6 +23,7 @@ import java.net.URLDecoder
  */
 
 const val ANDROID_DATA_PATH: String = "/storage/emulated/0/Android/data"
+const val DIND_TALK_PATH:String = "/storage/emulated/0/DingTalk"
 
 class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
 
@@ -96,8 +97,7 @@ class FilesScanWorker(private val mSrCtx: SoftReference<Context>) {
      * @date: 2022/2/18-8:44
      * @Email: junerver@gmail.com
      * @Version: v1.0
-     * @param   onNext
-     * @param onCompleted
+     * @param callBack
      * @return
      */
     fun setCallBack(callBack: FilesScanCallBackDsl.() -> Unit): FilesScanWorker {

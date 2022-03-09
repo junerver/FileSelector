@@ -243,10 +243,22 @@ open class FileSelectorActivity : AppCompatActivity(), OperateFileModelItem {
                     list.sortByDescending { it.extension }
                 }
                 BY_DATA_ASC -> {
-                    list.sortBy { it.isAndroidData }
+                    list.sortWith { o1, o2 ->
+                        if (o1.isAndroidData != o2.isAndroidData) {
+                            o2.isAndroidData.compareTo(o1.isAndroidData)
+                        } else {
+                            o2.date.compareTo(o1.date)
+                        }
+                    }
                 }
                 BY_DATA_DESC -> {
-                    list.sortByDescending { it.isAndroidData }
+                    list.sortWith { o1, o2 ->
+                        if (o1.isAndroidData != o2.isAndroidData) {
+                            o1.isAndroidData.compareTo(o2.isAndroidData)
+                        } else {
+                            o1.date.compareTo(o2.date)
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {
