@@ -29,10 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import xyz.junerver.fileselector.utils.FileUriUtils
 import java.io.File
 import java.net.URLDecoder
 import java.util.regex.Pattern
@@ -193,7 +190,7 @@ fun Context.showRequestDataTips(cancel: () -> Unit = {}, request: () -> Unit = {
 fun Context.getUriForFile(file: File): Uri {
     return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
         FileProvider.getUriForFile(
-            this.applicationContext,
+            this,
             "${this.packageName}.fileprovider",
             file
         )
@@ -206,6 +203,7 @@ fun Context.openFile(file: String) {
     try {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         intent.setDataAndType(this.getUriForFile(File(file)), MapTable.getMIMEType(file))
         this.startActivity(intent)
         Intent.createChooser(intent, "请选择对应的软件打开该附件！")
